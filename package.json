@@ -1,0 +1,15 @@
+{
+  "name": "landofile-editor",
+  "version": "1.0.0",
+  "description": "Web based editor for Landofiles",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "lando"
+  ],
+  "author": "Aaron Feledy",
+  "license": "GPL-3.0-or-later"
+}
+
