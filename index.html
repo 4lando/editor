@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Landofile Editor</title>
+    <link href="./src/style.css" rel="stylesheet">
+</head>
+
+<body class="transition-colors">
+    <div class="container mx-auto px-4 py-8 min-h-screen max-w-[1440px]">
+        <header class="mb-8 flex justify-between items-center">
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Landofile Editor</h1>
+                <p class="text-gray-600 dark:text-gray-400">A web-based YAML editor for Lando configuration files</p>
+            </div>
+            <button id="theme-toggle"
+                class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                <!-- Sun icon -->
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    class="h-6 w-6 text-gray-800 dark:text-gray-200 hidden dark:block" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                <!-- Moon icon -->
+                <svg xmlns="http://www.w3.org/2000/svg"
+                    class="h-6 w-6 text-gray-800 dark:text-gray-200 block dark:hidden" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+            </button>
+        </header>
+
+        <div class="flex flex-col lg:flex-row gap-8 h-full">
+            <!-- Editor Container -->
+            <div class="flex-1 min-w-0 lg:max-w-[calc(100%-20rem)]">
+                <div id="editor"
+                    class="w-full h-[600px] border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg"></div>
+            </div>
+
+            <!-- Instructions Panel -->
+            <aside class="w-full lg:w-80 flex-shrink-0 bg-white dark:bg-[#261D2D] p-6 rounded-lg shadow-lg">
+                <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Usage Instructions</h2>
+                <div class="prose prose-sm dark:prose-invert">
+                    <p class="mb-4 text-gray-600 dark:text-gray-300">The editor validates your Landofile configuration
+                        against the official schema.</p>
+
+                    <h3 class="text-lg font-medium mb-2 text-gray-800 dark:text-gray-200">Key Features:</h3>
+                    <ul class="list-disc pl-5 space-y-2 mb-4 text-gray-600 dark:text-gray-300">
+                        <li>YAML syntax highlighting</li>
+                        <li>Real-time validation</li>
+                        <li>Auto-completion</li>
+                        <li>Error highlighting</li>
+                    </ul>
+
+                    <h3 class="text-lg font-medium mb-2 text-gray-800 dark:text-gray-200">Common Fields:</h3>
+                    <ul class="list-disc pl-5 space-y-2 text-gray-600 dark:text-gray-300">
+                        <li><code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">name</code>: Project name</li>
+                        <li><code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">recipe</code>: Base configuration
+                        </li>
+                        <li><code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">config</code>: Recipe settings</li>
+                        <li><code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">services</code>: Custom services
+                        </li>
+                    </ul>
+                </div>
+            </aside>
+        </div>
+    </div>
+    <script type="module" src="./src/main.js"></script>
+</body>
+
+</html>

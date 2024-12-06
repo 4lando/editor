@@ -1,0 +1,33 @@
+name: landofile-editor
+
+services:
+  node:
+    type: node:20
+    build:
+      - npm install
+    command: vite --host 0.0.0.0
+    port: 5173
+    ssl: true
+  nginx:
+    type: nginx:1.25
+    webroot: public
+
+tooling:
+  npm:
+    service: node
+  node:
+    service: node
+  vite:
+    service: node
+  build:
+    service: node
+    cmd: npm run build
+  preview:
+    service: node
+    cmd: npm run preview
+
+proxy:
+  node:
+    - landofile-editor.lndo.site:5173
+  nginx:
+    - landofile-editor.lndo.site/public

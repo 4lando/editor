@@ -1,0 +1,52 @@
+/* Tailwind directives */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom properties */
+:root {
+  --c-bg: #f3f4f6;
+  --c-bg-lighter: #ffffff;
+}
+
+.dark {
+  --c-bg: #261D2D;
+  --c-bg-lighter: #382A3D;
+}
+
+/* Apply gradient background */
+body {
+  background: radial-gradient(
+    121.65% 71.43% at 91.1% 13.63%,
+    var(--c-bg-lighter) 0%,
+    var(--c-bg) 100%
+  );
+  min-height: 100vh;
+}
+
+/* Monaco Editor container styles */
+#editor {
+  position: relative;
+  min-height: 600px;
+  height: 600px;
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background-color: var(--c-bg);
+}
+
+.monaco-editor .overflow-guard {
+  margin-top: 0.5rem;
+}
+
+/* .monaco-editor .view-overlays {
+  margin-top: 0.5rem;
+} */
+
+/* Ensure Monaco Editor fills its container */
+.monaco-editor,
+.monaco-editor .overflow-guard {
+  width: 100% !important;
+  height: 100% !important;
+} 
