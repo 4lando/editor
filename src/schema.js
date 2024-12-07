@@ -150,7 +150,26 @@ export function validateYaml(content, schema) {
     if (!valid) {
       debug.log('Schema validation errors:', validate.errors);
       return validate.errors.map(error => {
-        // Convert JSON pointer to line/column
+        // Handle different error types
+        if (error.keyword === 'additionalProperties') {
+          // Find the location of the unexpected property
+          const path = error.instancePath.split('/').filter(Boolean);
+          const unexpectedProp = error.params.additionalProperty;
+          path.push(unexpectedProp); // Add the unexpected property to the path
+          const location = findLocationInYaml(content, path);
+          
+          return {
+            startLineNumber: location.line,
+            endLineNumber: location.line,
+            startColumn: location.column,
+            endColumn: location.column + unexpectedProp.length,
+            message: `Unexpected property "${unexpectedProp}"`,
+            severity: MarkerSeverity.Error,
+            source: 'JSON Schema'
+          };
+        }
+
+        // Handle other validation errors
         const path = error.instancePath.split('/').filter(Boolean);
         const location = findLocationInYaml(content, path);
         

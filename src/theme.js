@@ -69,7 +69,7 @@ export function initTheme() {
       const editors = monaco.editor.getEditors();
       editors.forEach(editor => {
         editor.updateOptions({
-          theme: isDark ? 'dracula' : 'vs',
+          theme: isDark ? 'lando' : 'vs',
         });
       });
     });
@@ -86,7 +86,7 @@ export function initTheme() {
       const editors = monaco.editor.getEditors();
       editors.forEach(editor => {
         editor.updateOptions({
-          theme: shouldBeDark ? 'dracula' : 'vs',
+          theme: shouldBeDark ? 'lando' : 'vs',
         });
       });
     }

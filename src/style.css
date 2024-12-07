@@ -40,10 +40,6 @@ body {
   margin-top: 0.5rem;
 }
 
-/* .monaco-editor .view-overlays {
-  margin-top: 0.5rem;
-} */
-
 /* Ensure Monaco Editor fills its container */
 .monaco-editor,
 .monaco-editor .overflow-guard {
