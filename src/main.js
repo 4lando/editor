@@ -1,4 +1,5 @@
 import * as monaco from 'monaco-editor';
+import { MarkerSeverity } from 'monaco-editor/esm/vs/editor/editor.api';
 import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
 import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
 import 'monaco-editor/esm/vs/basic-languages/yaml/yaml.contribution';
@@ -31,17 +32,26 @@ async function initEditor() {
       throw new Error('Editor container not found');
     }
 
-    // Register YAML language validation
-    debug.log('Loading schema...');
-    const schemaContent = await loadSchema();
-    
-    if (!schemaContent) {
-      debug.error('Failed to load schema');
-      return;
-    }
-    debug.log('Schema loaded successfully');
+    // Create the editor first, so it's available even if schema fails
+    debug.log('Creating Monaco editor instance...');
+    const isDark = document.documentElement.classList.contains('dark');
+    const editor = monaco.editor.create(container, {
+      value: getDefaultContent(),
+      language: 'yaml',
+      theme: isDark ? 'lando' : 'vs',
+      automaticLayout: true,
+      minimap: {
+        enabled: false,
+      },
+      scrollBeyondLastLine: false,
+      fontSize: 18,
+      lineNumbers: 'on',
+      renderWhitespace: 'selection',
+      tabSize: 2,
+      fixedOverflowWidgets: true,
+    });
 
-    // Register custom YAML validation using JSON schema
+    // Register YAML language support
     debug.log('Registering YAML language support...');
     monaco.languages.register({ id: 'yaml' });
     monaco.languages.setMonarchTokensProvider('yaml', {
@@ -102,46 +112,45 @@ async function initEditor() {
       }
     });
 
-    // Create the editor
-    debug.log('Creating Monaco editor instance...');
-    const isDark = document.documentElement.classList.contains('dark');
-    const editor = monaco.editor.create(container, {
-      value: getDefaultContent(),
-      language: 'yaml',
-      theme: isDark ? 'lando' : 'vs',
-      automaticLayout: true,
-      minimap: {
-        enabled: false,
-      },
-      scrollBeyondLastLine: false,
-      fontSize: 18,
-      lineNumbers: 'on',
-      renderWhitespace: 'selection',
-      tabSize: 2,
-      fixedOverflowWidgets: true,
-    });
+    // Load schema and set up validation
+    debug.log('Loading schema...');
+    const schemaContent = await loadSchema();
+    
+    if (!schemaContent) {
+      debug.warn('Schema failed to load - editor will continue without validation');
+      monaco.editor.setModelMarkers(editor.getModel(), 'yaml', [{
+        severity: MarkerSeverity.Warning,
+        message: 'Schema validation unavailable - schema failed to load',
+        startLineNumber: 1,
+        startColumn: 1,
+        endLineNumber: 1,
+        endColumn: 1,
+      }]);
+    } else {
+      debug.log('Schema loaded successfully');
+      
+      // Set up diagnostics for YAML validation
+      const updateDiagnostics = () => {
+        const content = editor.getValue();
+        try {
+          debug.log('Validating YAML content...');
+          const diagnostics = validateYaml(content, schemaContent);
+          debug.log('Validation results:', diagnostics);
+          monaco.editor.setModelMarkers(editor.getModel(), 'yaml', diagnostics);
+        } catch (e) {
+          debug.error('Validation error:', e);
+        }
+      };
 
-    // Set up diagnostics for YAML validation
-    const updateDiagnostics = () => {
-      const content = editor.getValue();
-      try {
-        debug.log('Validating YAML content...');
-        const diagnostics = validateYaml(content, schemaContent);
-        debug.log('Validation results:', diagnostics);
-        monaco.editor.setModelMarkers(editor.getModel(), 'yaml', diagnostics);
-      } catch (e) {
-        debug.error('Validation error:', e);
-      }
-    };
+      // Update diagnostics on content change
+      editor.onDidChangeModelContent(() => {
+        debug.log('Content changed, updating diagnostics...');
+        updateDiagnostics();
+      });
 
-    // Update diagnostics on content change
-    editor.onDidChangeModelContent(() => {
-      debug.log('Content changed, updating diagnostics...');
+      // Initial validation
       updateDiagnostics();
-    });
-
-    // Initial validation
-    updateDiagnostics();
+    }
 
     // Handle window resizing
     window.addEventListener('resize', () => {

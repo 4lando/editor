@@ -12,17 +12,39 @@ let schemaDefinitions = null;
 
 export async function loadSchema() {
   try {
-    debug.log('Fetching schema from:', 'https://4lando.github.io/lando-spec/landofile-spec.json');
-    const response = await fetch('https://4lando.github.io/lando-spec/landofile-spec.json');
+    const schemaUrl = 'https://4lando.github.io/lando-spec/landofile-spec.json';
+    debug.log('Fetching schema from:', schemaUrl);
+    
+    const response = await fetch(schemaUrl);
+    if (!response.ok) {
+      debug.error('Schema fetch failed:', {
+        status: response.status,
+        statusText: response.statusText,
+        url: response.url,
+      });
+      return null;
+    }
+    
     const schema = await response.json();
     debug.log('Schema loaded:', schema);
+    
+    if (!schema || typeof schema !== 'object') {
+      debug.error('Invalid schema format:', schema);
+      return null;
+    }
     
     // Store schema definitions for hover support
     schemaDefinitions = flattenSchema(schema);
     debug.log('Schema definitions:', schemaDefinitions);
     
-    // Compile schema
-    ajv.compile(schema);
+    // Verify schema can be compiled
+    try {
+      ajv.compile(schema);
+    } catch (compileError) {
+      debug.error('Schema compilation failed:', compileError);
+      return null;
+    }
+    
     return schema;
   } catch (error) {
     debug.error('Failed to load schema:', error);
