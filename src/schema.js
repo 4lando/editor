@@ -10,23 +10,54 @@ const ajv = new Ajv({
 
 let schemaDefinitions = null;
 
+// Try to import local schema, but don't fail if it doesn't exist
+let localSchema = null;
+try {
+  if (import.meta.env.DEV) {
+    debug.log('Development mode detected, attempting to use local schema...');
+    try {
+      const schema = await import('../landofile-spec.json');
+      localSchema = JSON.stringify(schema.default);
+      debug.log('Local schema loaded successfully');
+    } catch (importError) {
+      throw new Error(`Failed to import local schema: ${importError.message}`);
+    }
+  }
+} catch (e) {
+  debug.warn('Failed to load local schema:', e);
+}
+
 export async function loadSchema() {
   try {
-    const schemaUrl = 'https://4lando.github.io/lando-spec/landofile-spec.json';
-    debug.log('Fetching schema from:', schemaUrl);
-    
-    const response = await fetch(schemaUrl);
-    if (!response.ok) {
-      debug.error('Schema fetch failed:', {
-        status: response.status,
-        statusText: response.statusText,
-        url: response.url,
-      });
-      return null;
+    const isDev = import.meta.env.DEV;
+    let schema = null;
+
+    if (isDev && localSchema) {
+      try {
+        schema = JSON.parse(localSchema);
+        debug.log('Local schema parsed successfully');
+      } catch (localError) {
+        debug.warn('Failed to parse local schema:', localError);
+      }
     }
-    
-    const schema = await response.json();
-    debug.log('Schema loaded:', schema);
+
+    if (!schema) {
+      const schemaUrl = 'https://4lando.github.io/lando-spec/landofile-spec.json';
+      debug.log('Fetching schema from:', schemaUrl);
+      
+      const response = await fetch(schemaUrl);
+      if (!response.ok) {
+        debug.error('Schema fetch failed:', {
+          status: response.status,
+          statusText: response.statusText,
+          url: response.url,
+        });
+        return null;
+      }
+      
+      schema = await response.json();
+      debug.log('Remote schema loaded:', schema);
+    }
     
     if (!schema || typeof schema !== 'object') {
       debug.error('Invalid schema format:', schema);
@@ -47,7 +78,11 @@ export async function loadSchema() {
     
     return schema;
   } catch (error) {
-    debug.error('Failed to load schema:', error);
+    debug.error('Failed to load schema:', {
+      name: error.name,
+      message: error.message,
+      stack: error.stack,
+    });
     return null;
   }
 }

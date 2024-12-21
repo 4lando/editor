@@ -57,6 +57,10 @@ The editor will be available at `https://landofile-editor.lndo.site/public`.
 - Tailwind CSS for styling
 - PostCSS for CSS processing
 - Custom theme based on Lando brand colors
+- For local schema development:
+  - You may place a copy of `landofile-spec.json` in the project root
+  - The editor will use this local file instead of fetching the remote schema
+  - Useful for testing schema changes without publishing
 
 ## Contributing
 

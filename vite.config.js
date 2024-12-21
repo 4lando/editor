@@ -5,7 +5,7 @@ export default defineConfig({
   server: {
     open: true,
     fs: {
-      // Allow serving files from one level up to the project root
+      // Allow serving files from one level up to the src directory
       allow: ['..'],
     },
   },
@@ -13,6 +13,7 @@ export default defineConfig({
     alias: {
       'monaco-editor': path.resolve(__dirname, 'node_modules/monaco-editor'),
     },
+    preserveSymlinks: true,
   },
   worker: {
     format: 'es',

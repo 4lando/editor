@@ -37,3 +37,4 @@ lerna-debug.log*
 # Local files
 .lando.local.yml
 .cursorrules
+landofile-spec.json
