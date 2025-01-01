@@ -4,16 +4,16 @@ import { debug } from './debug';
 // Define Lando theme colors
 const landoTheme = {
   base: 'vs-dark',
-  inherit: false,
+  inherit: true,
   rules: [
     { token: '', foreground: 'f8f8f2' },
-    { token: 'key', foreground: 'dd3f8f' },
-    { token: 'string', foreground: 'f1fa8c' },
-    { token: 'number', foreground: 'bd93f9' },
-    { token: 'boolean', foreground: 'bd93f9' },
-    { token: 'comment', foreground: '6272a4', fontStyle: 'italic' },
-    { token: 'operator', foreground: 'dd3f8f' },
-    { token: 'delimiter', foreground: 'dd3f8f' },
+    { token: 'key', foreground: 'df4090' },
+    { token: 'type.yaml', foreground: 'df4090' },
+    { token: 'string.yaml', foreground: 'f1fa8c' },
+    { token: 'number.yaml', foreground: 'bd93f9' },
+    { token: 'keyword.yaml', foreground: 'bd93f9' },
+    { token: 'comment.yaml', foreground: '6272a4', fontStyle: 'italic' },
+    { token: 'operator.yaml', foreground: 'dd3f8f' },
     { token: 'delimiter.bracket', foreground: 'dd3f8f' },
     { token: 'delimiter.square', foreground: 'dd3f8f' },
   ],
@@ -42,8 +42,11 @@ const landoTheme = {
 };
 
 export function initTheme() {
-  // Register the Lando theme
+  debug.log('Registering Lando theme...');
   monaco.editor.defineTheme('lando', landoTheme);
+  
+  // Set Monaco's default theme immediately
+  monaco.editor.setTheme('lando');
 
   // Check for saved theme preference or use system preference
   const savedTheme = localStorage.getItem('theme');
@@ -52,8 +55,10 @@ export function initTheme() {
   // Set initial theme
   if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
     document.documentElement.classList.add('dark');
+    monaco.editor.setTheme('lando');
     debug.log('Initial theme: dark');
   } else {
+    monaco.editor.setTheme('vs');
     debug.log('Initial theme: light');
   }
 

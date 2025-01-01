@@ -32,9 +32,12 @@ async function initEditor() {
       throw new Error('Editor container not found');
     }
 
+    // Add debug logging for theme state
+    const isDark = document.documentElement.classList.contains('dark');
+    debug.log('Current theme state:', isDark ? 'dark' : 'light');
+
     // Create the editor first, so it's available even if schema fails
     debug.log('Creating Monaco editor instance...');
-    const isDark = document.documentElement.classList.contains('dark');
     const editor = monaco.editor.create(container, {
       value: getDefaultContent(),
       language: 'yaml',
@@ -51,58 +54,30 @@ async function initEditor() {
       fixedOverflowWidgets: true,
     });
 
-    // Register YAML language support
-    debug.log('Registering YAML language support...');
-    monaco.languages.register({ id: 'yaml' });
-    monaco.languages.setMonarchTokensProvider('yaml', {
-      defaultToken: '',
-      tokenPostfix: '.yaml',
-
-      // Shared definitions
-      brackets: [
-        { token: 'delimiter.bracket', open: '{', close: '}' },
-        { token: 'delimiter.square', open: '[', close: ']' }
-      ],
-
-      keywords: ['true', 'false', 'null', 'undefined'],
-
-      // Tokenizer
-      tokenizer: {
-        root: [
-          // Key-value pairs
-          [/^(\s*)([-]?)(\s*)([^:]*?)(:)( |$)/, ['white', 'operator', 'white', 'key', 'operator', 'white']],
+    // Modify the YAML language configuration instead of replacing it
+    const existingYamlTokenizer = monaco.languages.getTokensProvider('yaml');
+    if (existingYamlTokenizer) {
+      const originalTokenize = existingYamlTokenizer.tokenize.bind(existingYamlTokenizer);
+      
+      monaco.languages.setMonarchTokensProvider('yaml', {
+        ...existingYamlTokenizer,
+        tokenize: (line, state) => {
+          const tokens = originalTokenize(line, state);
           
-          // Comments
-          [/#.*$/, 'comment'],
+          // Modify tokens to match our theme's token names
+          if (tokens && tokens.tokens) {
+            tokens.tokens = tokens.tokens.map(token => {
+              if (token.scopes.includes('type.yaml')) {
+                return { ...token, scopes: ['key'] };
+              }
+              return token;
+            });
+          }
           
-          // Numbers
-          [/\d*\.\d+([eE][\-+]?\d+)?/, 'number.float'],
-          [/0[xX][0-9a-fA-F]+/, 'number.hex'],
-          [/\d+/, 'number'],
-          
-          // Strings
-          [/"([^"\\]|\\.)*$/, 'string.invalid'],
-          [/'([^'\\]|\\.)*$/, 'string.invalid'],
-          [/"/, 'string', '@string_double'],
-          [/'/, 'string', '@string_single'],
-          
-          // Whitespace
-          [/[ \t\r\n]+/, 'white'],
-        ],
-
-        string_double: [
-          [/[^\\"]+/, 'string'],
-          [/"/, 'string', '@pop'],
-          [/\\[^]/, 'string.escape']
-        ],
-
-        string_single: [
-          [/[^\\']+/, 'string'],
-          [/'/, 'string', '@pop'],
-          [/\\[^]/, 'string.escape']
-        ]
-      }
-    });
+          return tokens;
+        },
+      });
+    }
 
     // Register hover provider
     monaco.languages.registerHoverProvider('yaml', {
