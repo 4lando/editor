@@ -6,6 +6,7 @@ import { MarkerSeverity } from './constants';
 const ajv = new Ajv({
   allErrors: true,
   verbose: true,
+  allowUnionTypes: true,
 });
 
 let schemaDefinitions = null;
@@ -88,8 +89,99 @@ export async function loadSchema() {
 }
 
 // Flatten schema for easier lookup
-function flattenSchema(schema, prefix = '', result = {}) {
+function flattenSchema(schema, prefix = '', result = {}, visited = new Set(), rootSchema = null) {
+  if (!schema || visited.has(schema)) {
+    return result;
+  }
+  visited.add(schema);
+
+  // Store root schema on first call
+  if (!rootSchema) {
+    rootSchema = schema;
+    debug.log('Root schema initialized with keys:', Object.keys(rootSchema));
+  }
+
+  // Handle $ref resolution first
+  if (schema.$ref) {
+    debug.log('Resolving $ref:', schema.$ref);
+    const refPath = schema.$ref.replace('#/', '').split('/');
+    let refSchema = rootSchema;
+    
+    for (const part of refPath) {
+      if (!refSchema[part]) {
+        debug.warn('Failed to resolve ref part:', part);
+        return result;
+      }
+      refSchema = refSchema[part];
+    }
+    
+    // Merge properties from the referenced schema, but don't override existing ones
+    const merged = {
+      ...refSchema,
+      ...schema,
+      // Ensure description comes from the referenced schema unless explicitly set
+      description: schema.description || refSchema.description,
+    };
+    Object.assign(schema, merged);
+    debug.log('Resolved and merged reference:', refPath.join('/'), merged);
+  }
+
+  // Handle pattern properties
+  if (schema.patternProperties) {
+    debug.log('Processing pattern properties at prefix:', prefix);
+    Object.entries(schema.patternProperties).forEach(([pattern, value]) => {
+      const wildcardPath = prefix ? `${prefix}/*` : '*';
+      debug.log('Processing pattern:', pattern, 'at path:', wildcardPath);
+      
+      // First resolve any references in the pattern property value
+      if (value.$ref) {
+        const refPath = value.$ref.replace('#/', '').split('/');
+        let refSchema = rootSchema;
+        
+        for (const part of refPath) {
+          if (!refSchema[part]) {
+            debug.warn('Failed to resolve ref part:', part);
+            return;
+          }
+          refSchema = refSchema[part];
+        }
+        
+        // Create a new object for the pattern property to avoid sharing references
+        result[wildcardPath] = {
+          description: refSchema.description || '',
+          type: refSchema.type || value.type || '',
+          pattern,
+          oneOf: refSchema.oneOf || value.oneOf || [],
+          additionalProperties: refSchema.additionalProperties || value.additionalProperties,
+        };
+      } else {
+        // Handle non-ref pattern properties
+        result[wildcardPath] = {
+          description: value.description || '',
+          type: value.type || '',
+          pattern,
+          oneOf: value.oneOf || [],
+          additionalProperties: value.additionalProperties,
+        };
+      }
+
+      // Process the value schema (which might have its own properties or refs)
+      flattenSchema(value, wildcardPath, result, visited, rootSchema);
+    });
+  }
+
+  // Handle oneOf schemas
+  if (schema.oneOf) {
+    debug.log('Processing oneOf at prefix:', prefix);
+    schema.oneOf.forEach((subSchema, index) => {
+      const oneOfPath = `${prefix}#${index}`;
+      flattenSchema(subSchema, oneOfPath, result, visited, rootSchema);
+    });
+  }
+
+  // Handle regular properties
   if (schema.properties) {
+    debug.log('Processing regular properties at prefix:', prefix);
     Object.entries(schema.properties).forEach(([key, value]) => {
       const path = prefix ? `${prefix}/${key}` : key;
       result[path] = {
@@ -98,12 +190,37 @@ function flattenSchema(schema, prefix = '', result = {}) {
         enum: value.enum || [],
         examples: value.examples || [],
         default: value.default,
+        oneOf: value.oneOf || [],
+        additionalProperties: value.additionalProperties,
       };
-      if (value.properties) {
-        flattenSchema(value, path, result);
-      }
+      
+      // Continue flattening nested schemas
+      flattenSchema(value, path, result, visited, rootSchema);
+    });
+  } else if (prefix && !schema.patternProperties) {
+    // Handle non-object schemas
+    debug.log('Adding non-object schema at prefix:', prefix);
+    result[prefix] = {
+      description: schema.description || '',
+      type: schema.type || '',
+      enum: schema.enum || [],
+      examples: schema.examples || [],
+      default: schema.default,
+      oneOf: schema.oneOf || [],
+      additionalProperties: schema.additionalProperties,
+    };
+  }
+  
+  // Process $defs
+  if (schema.$defs) {
+    debug.log('Processing $defs');
+    Object.entries(schema.$defs).forEach(([key, value]) => {
+      const defsPath = `$defs/${key}`;
+      debug.log('Processing $def:', defsPath);
+      flattenSchema(value, defsPath, result, visited, rootSchema);
     });
   }
+  
   return result;
 }
 
@@ -136,12 +253,23 @@ export function getHoverInfo(content, position) {
       
       // Build path to current key
       const path = findPathAtPosition(content, position);
-      const schemaPath = path.join('/');
       
-      debug.log('Looking up hover info for path:', schemaPath);
+      debug.log('Looking up hover info for path:', path);
       
-      if (schemaDefinitions && schemaDefinitions[schemaPath]) {
-        const info = schemaDefinitions[schemaPath];
+      // Try to find schema info using different path patterns
+      let info = null;
+      const possiblePaths = generatePossiblePaths(path);
+      
+      for (const schemaPath of possiblePaths) {
+        debug.log('Trying schema path:', schemaPath);
+        if (schemaDefinitions && schemaDefinitions[schemaPath]) {
+          info = schemaDefinitions[schemaPath];
+          debug.log('Found schema info at path:', schemaPath);
+          break;
+        }
+      }
+      
+      if (info) {
         let contents = [];
         
         // Description
@@ -152,6 +280,11 @@ export function getHoverInfo(content, position) {
         // Type information
         if (info.type) {
           contents.push({ value: `Type: ${info.type}` });
+        }
+        
+        // Pattern (for pattern properties)
+        if (info.pattern) {
+          contents.push({ value: `Pattern: ${info.pattern}` });
         }
         
         // Enum values
@@ -177,6 +310,16 @@ export function getHoverInfo(content, position) {
           });
         }
         
+        // OneOf options
+        if (info.oneOf && info.oneOf.length) {
+          contents.push({ value: '\nPossible Formats:' });
+          info.oneOf.forEach((option, index) => {
+            if (option.description) {
+              contents.push({ value: `${index + 1}. ${option.description}` });
+            }
+          });
+        }
+        
         return {
           contents,
           range: {
@@ -192,6 +335,38 @@ export function getHoverInfo(content, position) {
     debug.error('Error getting hover info:', error);
   }
   return null;
+}
+
+// Helper function to generate possible schema paths including wildcards
+function generatePossiblePaths(path) {
+  const paths = [];
+  
+  // Start with the most specific full path
+  if (path.length > 0) {
+    paths.push(path.join('/'));
+  }
+  
+  // Then try wildcard variations, still maintaining specificity
+  if (path.length > 1) {
+    // For a path like ['services', 'node', 'type'], try:
+    // 1. services/*/type
+    // 2. services/node/*
+    // 3. services/*
+    for (let i = path.length - 1; i > 0; i--) {
+      const wildcardPath = [
+        ...path.slice(0, i),
+        '*',
+        ...path.slice(i + 1),
+      ].join('/');
+      paths.push(wildcardPath);
+    }
+  }
+  
+  // Add root level wildcard last (lowest priority)
+  paths.push('*');
+  
+  debug.log('Generated possible paths:', paths);
+  return paths.filter(Boolean); // Remove any empty paths
 }
 
 export function validateYaml(content, schema) {

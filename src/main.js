@@ -1,4 +1,5 @@
 import * as monaco from 'monaco-editor';
+import * as languages from 'monaco-editor/esm/vs/editor/common/languages';
 import { MarkerSeverity } from 'monaco-editor/esm/vs/editor/editor.api';
 import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
 import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
@@ -54,13 +55,14 @@ async function initEditor() {
       fixedOverflowWidgets: true,
     });
 
-    // Modify the YAML language configuration instead of replacing it
-    const existingYamlTokenizer = monaco.languages.getTokensProvider('yaml');
-    if (existingYamlTokenizer) {
-      const originalTokenize = existingYamlTokenizer.tokenize.bind(existingYamlTokenizer);
+    // Get the existing YAML configuration
+    const existingTokensProvider = languages.TokenizationRegistry.get('yaml');
+
+    if (existingTokensProvider) {
+      const originalTokenize = existingTokensProvider.tokenize.bind(existingTokensProvider);
       
       monaco.languages.setMonarchTokensProvider('yaml', {
-        ...existingYamlTokenizer,
+        ...existingTokensProvider,
         tokenize: (line, state) => {
           const tokens = originalTokenize(line, state);
           
