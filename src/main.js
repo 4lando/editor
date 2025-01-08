@@ -135,6 +135,55 @@ async function initEditor() {
       editor.layout();
     });
 
+    // Add drag and drop handling
+    container.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      container.classList.add('drag-over');
+    });
+
+    container.addEventListener('dragleave', () => {
+      container.classList.remove('drag-over');
+    });
+
+    container.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      container.classList.remove('drag-over');
+
+      const file = e.dataTransfer.files[0];
+      if (!file) return;
+
+      // Check if it's a .lando.yml file
+      if (!file.name.match(/^\.lando(\..*)?\.yml$/i)) {
+        debug.warn('Invalid file type:', file.name);
+        // Show error message
+        monaco.editor.setModelMarkers(editor.getModel(), 'yaml', [{
+          severity: MarkerSeverity.Error,
+          message: 'Only .lando.yml and .lando.*.yml files are supported',
+          startLineNumber: 1,
+          startColumn: 1,
+          endLineNumber: 1,
+          endColumn: 1,
+        }]);
+        return;
+      }
+
+      try {
+        const content = await file.text();
+        editor.setValue(content);
+        debug.log('File loaded successfully:', file.name);
+      } catch (error) {
+        debug.error('Error reading file:', error);
+        monaco.editor.setModelMarkers(editor.getModel(), 'yaml', [{
+          severity: MarkerSeverity.Error,
+          message: `Error reading file: ${error.message}`,
+          startLineNumber: 1,
+          startColumn: 1,
+          endLineNumber: 1,
+          endColumn: 1,
+        }]);
+      }
+    });
+
     debug.log('Editor initialized successfully');
     return editor;
   } catch (error) {
