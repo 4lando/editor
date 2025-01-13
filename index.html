@@ -53,9 +53,14 @@
         <div class="flex-1">
             <header class="mb-8 flex justify-between items-center">
                 <div>
-                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Landofile Editor</h1>
-                    <p class="text-gray-600 dark:text-gray-400">A web-based YAML editor for Lando configuration files</p>
-                </div>
+                    <div class="flex items-center gap-3">
+                        <img src="icon.svg" alt="Lando Logo" class="w-14 h-14" />
+                        <div>
+                            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Landofile Editor</h1>
+                            <p class="text-gray-600 dark:text-gray-400">A web-based YAML editor for Lando configuration files</p>
+                            </div>
+                        </div>
+                        </div>
                 <div class="flex items-center gap-4">
                     <a href="https://github.com/4lando/editor" target="_blank" rel="noopener noreferrer"
                         class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
@@ -158,19 +163,28 @@
                 </div>
 
                 <!-- Instructions Panel -->
-                <aside class="w-full lg:w-80 flex-shrink-0 bg-white dark:bg-[#261D2D] p-6 rounded-lg shadow-lg">
+                <aside
+                    class="w-full lg:w-80 flex-shrink-0 bg-white dark:bg-[#261D2D] p-6 rounded-lg shadow-lg max-h-[600px] overflow-y-auto instructions-panel">
                     <h2 class="text-xl font-semibold mb-4 text-gray-900 dark:text-white">Usage Instructions</h2>
                     <div class="prose prose-sm dark:prose-invert">
                         <p class="mb-4 text-gray-600 dark:text-gray-300">The editor validates your Landofile configuration
                             against the <a href="https://github.com/4lando/lando-spec" target="_blank" rel="noopener noreferrer"
                             class="text-[#df4090] hover:underline">community schema</a>.</p>
 
-                        <h3 class="text-lg font-medium mb-2 text-gray-800 dark:text-gray-200">Key Features:</h3>
+                        <h3 class="text-lg font-medium mb-2 text-gray-800 dark:text-gray-200">Working with Files:</h3>
                         <ul class="list-disc pl-5 space-y-2 mb-4 text-gray-600 dark:text-gray-300">
-                            <li>YAML syntax highlighting</li>
-                            <li>Real-time validation</li>
-                            <li>Auto-completion</li>
-                            <li>Error highlighting</li>
+                            <li>Drag & drop, paste, or click Open to load a .lando.yml file</li>
+                            <li>Save will download as _.lando.yml</li>
+                            <li>Content auto-formats on load</li>
+                            <li>Share will generate a URL to share your file</li>
+                        </ul>
+                        
+                        <h3 class="text-lg font-medium mb-2 text-gray-800 dark:text-gray-200">Editing Features:</h3>
+                        <ul class="list-disc pl-5 space-y-2 mb-4 text-gray-600 dark:text-gray-300">
+                            <li>Format with Ctrl+Shift+F or button</li>
+                            <li>Auto-completion suggestions</li>
+                            <li>Hover for field descriptions</li>
+                            <li>Real-time error checking</li>
                         </ul>
 
                         <h3 class="text-lg font-medium mb-2 text-gray-800 dark:text-gray-200">Common Fields:</h3>
