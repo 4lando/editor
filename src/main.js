@@ -249,12 +249,29 @@ async function initEditor() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = '.lando.yml';
+      a.download = '_.lando.yml';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
       drawer.classList.remove('open');
+      
+      // Show notification
+      const toast = document.createElement('div');
+      toast.className = 'toast-notification text-gray-700 dark:text-gray-200';
+      toast.textContent = 'Remember to remove the underscore from "_.lando.yml" after downloading';
+      document.body.appendChild(toast);
+      
+      // Trigger animation
+      requestAnimationFrame(() => {
+        toast.classList.add('show');
+        setTimeout(() => {
+          toast.classList.remove('show');
+          setTimeout(() => {
+            document.body.removeChild(toast);
+          }, 300); // Remove after fade out
+        }, 5000); // Show for 5 seconds
+      });
     });
 
     menuButton.addEventListener('click', () => {
