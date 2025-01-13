@@ -7,6 +7,7 @@ import 'monaco-editor/esm/vs/basic-languages/yaml/yaml.contribution';
 import { loadSchema, validateYaml, getHoverInfo } from './schema';
 import { debug } from './debug';
 import { initTheme } from './theme';
+import { formatYaml } from './format';
 import { showToast } from './toast';
 
 // Initialize theme before editor
@@ -170,8 +171,18 @@ async function initEditor() {
 
       try {
         const content = await file.text();
-        editor.setValue(content);
+        // Format content before setting it
+        const formatted = formatYaml(content);
+        // Only show toast if formatting made changes
+        if (formatted !== content) {
+          showToast('File was automatically formatted', 2000);
+        }
+        editor.executeEdits('format', [{
+          range: editor.getModel().getFullModelRange(),
+          text: formatted,
+        }]);
         debug.log('File loaded successfully:', file.name);
+        drawer.classList.remove('open');
       } catch (error) {
         debug.error('Error reading file:', error);
         monaco.editor.setModelMarkers(editor.getModel(), 'yaml', [{
@@ -199,6 +210,7 @@ async function initEditor() {
     const fileInput = document.getElementById('file-input');
     const openFileBtn = document.getElementById('open-file-btn');
     const saveFileBtn = document.getElementById('save-file-btn');
+    const formatBtn = document.getElementById('format-btn');
 
     // Handle file opening
     openFileBtn.addEventListener('click', () => {
@@ -225,7 +237,16 @@ async function initEditor() {
 
       try {
         const content = await file.text();
-        editor.setValue(content);
+        // Format content before setting it
+        const formatted = formatYaml(content);
+        // Only show toast if formatting made changes
+        if (formatted !== content) {
+          showToast('File was automatically formatted', 2000);
+        }
+        editor.executeEdits('format', [{
+          range: editor.getModel().getFullModelRange(),
+          text: formatted,
+        }]);
         debug.log('File loaded successfully:', file.name);
         drawer.classList.remove('open');
       } catch (error) {
@@ -258,16 +279,78 @@ async function initEditor() {
       drawer.classList.remove('open');
       
       showToast('Remember to remove the underscore from "_.lando.yml" after downloading', 5000);
-      // Trigger animation
-      requestAnimationFrame(() => {
-        toast.classList.add('show');
-        setTimeout(() => {
-          toast.classList.remove('show');
-          setTimeout(() => {
-            document.body.removeChild(toast);
-          }, 300); // Remove after fade out
-        }, 5000); // Show for 5 seconds
-      });
+    });
+
+    // Add format action to context menu
+    editor.addAction({
+      id: 'format-yaml',
+      label: 'Format Document',
+      keybindings: [
+        monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyF
+      ],
+      contextMenuGroupId: '1_modification',
+      contextMenuOrder: 1.5,
+      run: function(ed) {
+        try {
+          const content = ed.getValue();
+          const formatted = formatYaml(content);
+          // Use editor.executeEdits to preserve undo history
+          ed.executeEdits('format', [
+            {
+              range: ed.getModel().getFullModelRange(),
+              text: formatted,
+            }
+          ]);
+          debug.log('YAML formatted successfully');
+          drawer.classList.remove('open');
+          showToast('Document formatted successfully', 2000);
+        } catch (error) {
+          debug.error('Format failed:', error);
+          // Try to get the line and column from the error if available
+          const errorMatch = error.message.match(/at line (\d+), column (\d+)/i);
+          const startLine = errorMatch ? parseInt(errorMatch[1]) : 1;
+          const startCol = errorMatch ? parseInt(errorMatch[2]) : 1;
+          
+          showToast(`Failed to format: ${error.message}`, 5000);
+          monaco.editor.setModelMarkers(ed.getModel(), 'yaml', [{
+            severity: MarkerSeverity.Error,
+            message: `Failed to format: ${error.message}`,
+            startLineNumber: startLine,
+            startColumn: startCol,
+            endLineNumber: startLine,
+            endColumn: startCol + 1,
+          }]);
+        }
+      }
+    });
+
+    // Handle format button click
+    formatBtn.addEventListener('click', () => {
+      try {
+        const content = editor.getValue();
+        const formatted = formatYaml(content);
+        // Use editor.executeEdits to preserve undo history
+        editor.executeEdits('format', [
+          {
+            range: editor.getModel().getFullModelRange(),
+            text: formatted,
+          }
+        ]);
+        debug.log('YAML formatted successfully');
+        drawer.classList.remove('open');
+        showToast('Document formatted successfully', 2000);
+      } catch (error) {
+        debug.error('Format failed:', error);
+        showToast(`Failed to format: ${error.message}`, 5000);
+        monaco.editor.setModelMarkers(editor.getModel(), 'yaml', [{
+          severity: MarkerSeverity.Error,
+          message: `Failed to format: ${error.message}`,
+          startLineNumber: 1,
+          startColumn: 1,
+          endLineNumber: 1,
+          endColumn: 1,
+        }]);
+      }
     });
 
     menuButton.addEventListener('click', () => {
