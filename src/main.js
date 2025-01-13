@@ -1,6 +1,6 @@
 import * as monaco from 'monaco-editor';
-import * as languages from 'monaco-editor/esm/vs/editor/common/languages';
-import { MarkerSeverity } from 'monaco-editor/esm/vs/editor/editor.api';
+import { TokenizationRegistry } from 'monaco-editor/esm/vs/editor/common/languages';
+import { MarkerSeverity } from 'monaco-editor/esm/vs/platform/markers/common/markers';
 import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
 import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
 import 'monaco-editor/esm/vs/basic-languages/yaml/yaml.contribution';
@@ -56,7 +56,7 @@ async function initEditor() {
     });
 
     // Get the existing YAML configuration
-    const existingTokensProvider = languages.TokenizationRegistry.get('yaml');
+    const existingTokensProvider = TokenizationRegistry.get('yaml');
 
     if (existingTokensProvider) {
       const originalTokenize = existingTokensProvider.tokenize.bind(existingTokensProvider);
@@ -183,6 +183,13 @@ async function initEditor() {
         }]);
       }
     });
+
+    // Hide the loader after everything is initialized
+    const loader = document.getElementById('editor-loader');
+    if (loader) {
+      loader.classList.add('fade-out');
+      setTimeout(() => loader.remove(), 300); // Remove after fade animation
+    }
 
     debug.log('Editor initialized successfully');
     return editor;

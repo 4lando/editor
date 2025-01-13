@@ -67,3 +67,11 @@ body {
 .dark #editor.drag-over::after {
   background: rgba(255, 255, 255, 0.15);
 }
+/* Add fade-out animation for the loader */
+#editor-loader {
+  transition: opacity 0.3s ease-out;
+}
+
+#editor-loader.fade-out {
+  opacity: 0;
+}
