@@ -9,6 +9,8 @@ import { debug } from './debug';
 import { initTheme } from './theme';
 import { formatYaml } from './format';
 import { showToast } from './toast';
+import { generateShareUrl, getSharedContent } from './share';
+import { showShareDialog } from './dialog';
 
 // Initialize theme before editor
 initTheme();
@@ -44,7 +46,7 @@ async function initEditor() {
     const editor = monaco.editor.create(container, {
       value: getDefaultContent(),
       language: 'yaml',
-      theme: isDark ? 'lando' : 'vs',
+      theme: document.documentElement.classList.contains('dark') ? 'lando' : 'vs',
       automaticLayout: true,
       minimap: {
         enabled: false,
@@ -56,6 +58,42 @@ async function initEditor() {
       tabSize: 2,
       fixedOverflowWidgets: true,
     });
+
+    // Handle paste events
+    editor.onDidPaste((e) => {
+      try {
+        const content = editor.getValue();
+        const formatted = formatYaml(content);
+        
+        // Only format and show toast if content changed
+        if (formatted !== content) {
+          editor.executeEdits('format', [{
+            range: editor.getModel().getFullModelRange(),
+            text: formatted,
+          }]);
+          showToast('Content was automatically formatted', 2000);
+        }
+      } catch (error) {
+        debug.error('Failed to format pasted content:', error);
+        showToast(`Failed to format: ${error.message}`, 5000);
+      }
+    });
+
+    // Check for shared content
+    const sharedContent = getSharedContent();
+    if (sharedContent) {
+      try {
+        editor.setValue(sharedContent);
+        showToast('Loaded shared Landofile', 2000);
+        // Clear the URL parameter without reloading the page
+        const url = new URL(window.location.href);
+        url.searchParams.delete('s');
+        window.history.replaceState({}, '', url.toString());
+      } catch (error) {
+        debug.error('Failed to load shared content:', error);
+        showToast('Failed to load shared content', 5000);
+      }
+    }
 
     // Get the existing YAML configuration
     const existingTokensProvider = TokenizationRegistry.get('yaml');
@@ -211,6 +249,7 @@ async function initEditor() {
     const openFileBtn = document.getElementById('open-file-btn');
     const saveFileBtn = document.getElementById('save-file-btn');
     const formatBtn = document.getElementById('format-btn');
+    const shareBtn = document.getElementById('share-btn');
 
     // Handle file opening
     openFileBtn.addEventListener('click', () => {
@@ -350,6 +389,19 @@ async function initEditor() {
           endLineNumber: 1,
           endColumn: 1,
         }]);
+      }
+    });
+
+    // Handle share button click
+    shareBtn.addEventListener('click', () => {
+      try {
+        const content = editor.getValue();
+        const shareUrl = generateShareUrl(content);
+        showShareDialog(shareUrl);
+        drawer.classList.remove('open');
+      } catch (error) {
+        debug.error('Failed to share:', error);
+        showToast('Failed to generate share URL', 5000);
       }
     });
 

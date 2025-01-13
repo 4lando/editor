@@ -47,7 +47,6 @@ export function initTheme() {
   
   // Set initial Monaco theme based on current dark mode state
   const isDark = document.documentElement.classList.contains('dark');
-  monaco.editor.setTheme(isDark ? 'lando' : 'vs');
   debug.log('Initial theme:', isDark ? 'dark' : 'light');
 
   // Listen for theme changes
