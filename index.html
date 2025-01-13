@@ -6,6 +6,45 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Landofile Editor</title>
     <link rel="icon" href="icon.svg" type="image/svg+xml">
+    <script>
+        // Check for saved theme preference or use system preference
+        const savedTheme = localStorage.getItem('theme');
+        const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        // Set initial theme
+        if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+            document.documentElement.classList.add('dark');
+        }
+
+        // Listen for system theme changes
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+            if (!localStorage.getItem('theme')) {
+                document.documentElement.classList.toggle('dark', e.matches);
+                // Dispatch theme change event
+                window.dispatchEvent(new CustomEvent('themechange', {
+                    detail: { isDark: e.matches }
+                }));
+            }
+        });
+
+        // Set up theme toggle as soon as DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeToggle = document.getElementById('theme-toggle');
+            if (themeToggle) {
+                // Remove disabled state
+                themeToggle.classList.remove('opacity-50', 'cursor-not-allowed');
+                themeToggle.disabled = false;
+
+                themeToggle.addEventListener('click', () => {
+                    const isDark = document.documentElement.classList.toggle('dark');
+                    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                    window.dispatchEvent(new CustomEvent('themechange', {
+                        detail: { isDark }
+                    }));
+                });
+            }
+        });
+    </script>
     <link href="./src/style.css" rel="stylesheet">
 </head>
 
@@ -29,7 +68,9 @@
                         </svg>
                     </a>
                     <button id="theme-toggle"
-                        class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+                        disabled
+                        class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors opacity-50 cursor-not-allowed"
+                    >
                         <!-- Sun icon -->
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800 dark:text-gray-200 hidden dark:block" fill="none"
                             viewBox="0 0 24 24" stroke="currentColor">
@@ -42,7 +83,7 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                         </svg>
-                        </button>
+                    </button>
                 </div>
             </header>
 

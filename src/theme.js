@@ -45,55 +45,22 @@ export function initTheme() {
   debug.log('Registering Lando theme...');
   monaco.editor.defineTheme('lando', landoTheme);
   
-  // Set Monaco's default theme immediately
-  monaco.editor.setTheme('lando');
+  // Set initial Monaco theme based on current dark mode state
+  const isDark = document.documentElement.classList.contains('dark');
+  monaco.editor.setTheme(isDark ? 'lando' : 'vs');
+  debug.log('Initial theme:', isDark ? 'dark' : 'light');
 
-  // Check for saved theme preference or use system preference
-  const savedTheme = localStorage.getItem('theme');
-  const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  
-  // Set initial theme
-  if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
-    document.documentElement.classList.add('dark');
-    monaco.editor.setTheme('lando');
-    debug.log('Initial theme: dark');
-  } else {
-    monaco.editor.setTheme('vs');
-    debug.log('Initial theme: light');
-  }
-
-  // Theme toggle button handler
-  const themeToggle = document.getElementById('theme-toggle');
-  if (themeToggle) {
-    themeToggle.addEventListener('click', () => {
-      const isDark = document.documentElement.classList.toggle('dark');
-      localStorage.setItem('theme', isDark ? 'dark' : 'light');
-      debug.log('Theme toggled to:', isDark ? 'dark' : 'light');
-      
-      // Update Monaco Editor theme
-      const editors = monaco.editor.getEditors();
-      editors.forEach(editor => {
-        editor.updateOptions({
-          theme: isDark ? 'lando' : 'vs',
-        });
+  // Listen for theme changes
+  window.addEventListener('themechange', (e) => {
+    const isDark = e.detail.isDark;
+    debug.log('Theme changed to:', isDark ? 'dark' : 'light');
+    
+    // Update Monaco Editor theme
+    const editors = monaco.editor.getEditors();
+    editors.forEach(editor => {
+      editor.updateOptions({
+        theme: isDark ? 'lando' : 'vs',
       });
     });
-  }
-
-  // Listen for system theme changes
-  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
-    if (!localStorage.getItem('theme')) {
-      const shouldBeDark = e.matches;
-      document.documentElement.classList.toggle('dark', shouldBeDark);
-      debug.log('System theme changed to:', shouldBeDark ? 'dark' : 'light');
-      
-      // Update Monaco Editor theme
-      const editors = monaco.editor.getEditors();
-      editors.forEach(editor => {
-        editor.updateOptions({
-          theme: shouldBeDark ? 'lando' : 'vs',
-        });
-      });
-    }
   });
 } 
