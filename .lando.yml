@@ -28,6 +28,6 @@ tooling:
 
 proxy:
   node:
-    - landofile-editor.lndo.site:5173
+    - editor.lndo.site:5173
   nginx:
-    - landofile-editor.lndo.site/public
+    - editor.lndo.site/public

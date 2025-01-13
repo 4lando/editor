@@ -29,8 +29,8 @@ All schema-powered features (validation, suggestions, hover tooltips, etc) are d
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/lando/landofile-editor.git
-cd landofile-editor
+git clone https://github.com/lando/editor.git
+cd editor
 ```
 
 2. Start the development environment:
@@ -39,7 +39,7 @@ cd landofile-editor
 lando start
 ```
 
-The editor will be available at `https://landofile-editor.lndo.site`.
+The editor will be available at `https://editor.lndo.site`.
 
 ### Building
 
@@ -48,7 +48,12 @@ To create a production build:
 ```bash
 lando build
 ```
-The editor will be available at `https://landofile-editor.lndo.site/public`.
+The editor will be available at `https://editor.lndo.site/public`.
+
+### Deployment
+
+The editor is automatically deployed to GitHub Pages when code is pushed to the main branch.
+You can access the live version at: https://4lando.github.io/editor/
 
 ### Development Notes
 

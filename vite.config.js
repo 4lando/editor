@@ -28,12 +28,19 @@ export default defineConfig({
   build: {
     outDir: 'public',
     assetsDir: 'assets',
+    chunkSizeWarningLimit: 1000,
     rollupOptions: {
       output: {
         manualChunks: {
-          monaco: ['monaco-editor'],
-          editor: ['monaco-editor/esm/vs/editor/editor.worker'],
-          json: ['monaco-editor/esm/vs/language/json/json.worker'],
+          // Core Monaco Editor
+          'monaco': ['monaco-editor'],
+          
+          // Workers
+          'editor-worker': ['monaco-editor/esm/vs/editor/editor.worker'],
+          'json-worker': ['monaco-editor/esm/vs/language/json/json.worker'],
+          
+          // YAML language support
+          'yaml': ['monaco-editor/esm/vs/basic-languages/yaml/yaml.contribution'],
         },
       },
     },
