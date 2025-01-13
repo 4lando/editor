@@ -75,3 +75,21 @@ body {
 #editor-loader.fade-out {
   opacity: 0;
 }
+.editor-drawer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  height: 100%;
+  width: 0;
+  transition: width 0.3s ease-out;
+  overflow: hidden;
+  z-index: 15;
+}
+
+.editor-drawer.open {
+  width: 200px;
+}
+
+.editor-drawer-content {
+  width: 200px;
+}

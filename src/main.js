@@ -192,6 +192,82 @@ async function initEditor() {
     }
 
     debug.log('Editor initialized successfully');
+
+    const menuButton = document.getElementById('editor-menu-button');
+    const drawer = container.querySelector('.editor-drawer');
+    const fileInput = document.getElementById('file-input');
+    const openFileBtn = document.getElementById('open-file-btn');
+    const saveFileBtn = document.getElementById('save-file-btn');
+
+    // Handle file opening
+    openFileBtn.addEventListener('click', () => {
+      fileInput.click();
+    });
+
+    fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      // Check if it's a .lando.yml file
+      if (!file.name.match(/^\.lando(\..*)?\.yml$/i)) {
+        debug.warn('Invalid file type:', file.name);
+        monaco.editor.setModelMarkers(editor.getModel(), 'yaml', [{
+          severity: MarkerSeverity.Error,
+          message: 'Only .lando.yml and .lando.*.yml files are supported',
+          startLineNumber: 1,
+          startColumn: 1,
+          endLineNumber: 1,
+          endColumn: 1,
+        }]);
+        return;
+      }
+
+      try {
+        const content = await file.text();
+        editor.setValue(content);
+        debug.log('File loaded successfully:', file.name);
+        drawer.classList.remove('open');
+      } catch (error) {
+        debug.error('Error reading file:', error);
+        monaco.editor.setModelMarkers(editor.getModel(), 'yaml', [{
+          severity: MarkerSeverity.Error,
+          message: `Error reading file: ${error.message}`,
+          startLineNumber: 1,
+          startColumn: 1,
+          endLineNumber: 1,
+          endColumn: 1,
+        }]);
+      }
+      // Reset file input
+      fileInput.value = '';
+    });
+
+    // Handle file saving
+    saveFileBtn.addEventListener('click', () => {
+      const content = editor.getValue();
+      const blob = new Blob([content], { type: 'text/yaml' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = '.lando.yml';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      drawer.classList.remove('open');
+    });
+
+    menuButton.addEventListener('click', () => {
+      drawer.classList.toggle('open');
+    });
+
+    // Close drawer when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!drawer.contains(e.target) && !menuButton.contains(e.target)) {
+        drawer.classList.remove('open');
+      }
+    });
+
     return editor;
   } catch (error) {
     debug.error('Failed to initialize editor:', error);
