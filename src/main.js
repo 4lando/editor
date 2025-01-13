@@ -7,6 +7,7 @@ import 'monaco-editor/esm/vs/basic-languages/yaml/yaml.contribution';
 import { loadSchema, validateYaml, getHoverInfo } from './schema';
 import { debug } from './debug';
 import { initTheme } from './theme';
+import { showToast } from './toast';
 
 // Initialize theme before editor
 initTheme();
@@ -256,12 +257,7 @@ async function initEditor() {
       URL.revokeObjectURL(url);
       drawer.classList.remove('open');
       
-      // Show notification
-      const toast = document.createElement('div');
-      toast.className = 'toast-notification text-gray-700 dark:text-gray-200';
-      toast.textContent = 'Remember to remove the underscore from "_.lando.yml" after downloading';
-      document.body.appendChild(toast);
-      
+      showToast('Remember to remove the underscore from "_.lando.yml" after downloading', 5000);
       // Trigger animation
       requestAnimationFrame(() => {
         toast.classList.add('show');
