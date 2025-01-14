@@ -4,13 +4,14 @@ import { MarkerSeverity } from 'monaco-editor/esm/vs/platform/markers/common/mar
 import editorWorker from 'monaco-editor/esm/vs/editor/editor.worker?worker';
 import jsonWorker from 'monaco-editor/esm/vs/language/json/json.worker?worker';
 import 'monaco-editor/esm/vs/basic-languages/yaml/yaml.contribution';
-import { loadSchema, validateYaml, getHoverInfo } from './schema';
+import { loadSchema, validateYaml, getHoverInfo, getCompletionItems } from './schema';
 import { debug } from './debug';
 import { initTheme } from './theme';
 import { formatYaml } from './format';
 import { showToast } from './toast';
 import { generateShareUrl, getSharedContent } from './share';
 import { showShareDialog } from './dialog';
+import { registerCompletionProvider } from './completions';
 
 // Initialize theme before editor
 initTheme();
@@ -57,6 +58,31 @@ async function initEditor() {
       renderWhitespace: 'selection',
       tabSize: 2,
       fixedOverflowWidgets: true,
+      // Suggestion settings
+      quickSuggestions: true, // Simplified this
+      suggestOnTriggerCharacters: true,
+      wordBasedSuggestions: false, // Changed to boolean
+      parameterHints: {
+        enabled: true,
+      },
+      suggest: {
+        snippetsPreventQuickSuggestions: false,
+        showWords: false,
+        filterGraceful: false,
+        showSnippets: true,
+        showProperties: true,
+        localityBonus: true,
+        insertMode: 'insert',
+        insertHighlight: true,
+        selectionMode: 'always',
+      },
+      acceptSuggestionOnEnter: 'on',
+      acceptSuggestionOnCommitCharacter: true,
+      snippetSuggestions: 'inline',
+      tabCompletion: 'on',
+      snippetOptions: {
+        exitOnEnter: true,
+      },
     });
 
     // Handle paste events
@@ -415,6 +441,12 @@ async function initEditor() {
         drawer.classList.remove('open');
       }
     });
+
+    // Register YAML completion provider after schema is loaded
+    const schema = await loadSchema();
+    if (schema) {
+      registerCompletionProvider(schema);
+    }
 
     return editor;
   } catch (error) {
