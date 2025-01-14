@@ -34,6 +34,7 @@ body {
   border-radius: 0.5rem;
   overflow: hidden;
   background-color: var(--c-bg);
+  z-index: 1;
 }
 
 .monaco-editor .overflow-guard {
@@ -158,4 +159,14 @@ body {
     
     .dark .instructions-panel::-webkit-scrollbar-thumb {
       background-color: #df4090;
+}
+/* Add fade-out animation */
+.fade-out {
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
+}
+
+/* Make sure Monaco editor has proper z-index */
+.monaco-editor {
+  z-index: 1;
 }

@@ -17,6 +17,12 @@ export default defineConfig({
   },
   worker: {
     format: 'es',
+    plugins: [],
+    rollupOptions: {
+      output: {
+        sourcemap: false, // Disable source maps for workers
+      },
+    },
   },
   optimizeDeps: {
     include: [
@@ -28,6 +34,7 @@ export default defineConfig({
   build: {
     outDir: 'public',
     assetsDir: 'assets',
+    sourcemap: true, // Enable source maps for main bundle
     rollupOptions: {
       output: {
         manualChunks: {
