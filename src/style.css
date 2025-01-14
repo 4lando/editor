@@ -16,11 +16,9 @@
 
 /* Apply gradient background */
 body {
-  background: radial-gradient(
-    121.65% 71.43% at 91.1% 13.63%,
-    var(--c-bg-lighter) 0%,
-    var(--c-bg) 100%
-  );
+  background: radial-gradient(121.65% 71.43% at 91.1% 13.63%,
+      var(--c-bg-lighter) 0%,
+      var(--c-bg) 100%);
   min-height: 100vh;
 }
 
@@ -47,6 +45,7 @@ body {
   width: 100% !important;
   height: 100% !important;
 }
+
 /* Add styles for drag and drop visual feedback */
 #editor.drag-over::after {
   content: 'Drop .lando.yml or .lando.*.yml file here';
@@ -68,6 +67,7 @@ body {
 .dark #editor.drag-over::after {
   background: rgba(255, 255, 255, 0.15);
 }
+
 /* Add fade-out animation for the loader */
 #editor-loader {
   transition: opacity 0.3s ease-out;
@@ -76,6 +76,7 @@ body {
 #editor-loader.fade-out {
   opacity: 0;
 }
+
 .editor-drawer {
   position: absolute;
   top: 0;
@@ -107,19 +108,19 @@ body {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
   opacity: 0;
   transition: all 0.4s cubic-bezier(0.15, 1.15, 0.4, 1.2);
-    border-color: #df4090;
+  border-color: #df4090;
   z-index: 50;
   cursor: pointer;
-  }
-  
-  /* Next toast peek styles */
-  .toast-notification.next {
-    transform: translateX(-50%) translateY(calc(300% + 10px));
-    z-index: 49;
-  }
-  
-  .toast-notification.next.show {
-    transform: translateX(-50%) translateY(calc(100% + 10px));
+}
+
+/* Next toast peek styles */
+.toast-notification.next {
+  transform: translateX(-50%) translateY(calc(300% + 10px));
+  z-index: 49;
+}
+
+.toast-notification.next.show {
+  transform: translateX(-50%) translateY(calc(100% + 10px));
 }
 
 .dark .toast-notification {
@@ -129,37 +130,38 @@ body {
 .toast-notification.show {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
-    border-color: #e5e7eb;
-  }
-  
-  .toast-notification:hover {
-    @apply shadow-lg;
-    }
-    
-    /* Custom scrollbar for instructions panel */
-    .instructions-panel {
-      scrollbar-width: thin;
-      scrollbar-color: #df4090 transparent;
-    }
-    
-    .instructions-panel::-webkit-scrollbar {
-      width: 8px;
-    }
-    
-    .instructions-panel::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    
-    .instructions-panel::-webkit-scrollbar-thumb {
-      background-color: #df4090;
-      border-radius: 20px;
-      border: 2px solid transparent;
-      background-clip: content-box;
-    }
-    
-    .dark .instructions-panel::-webkit-scrollbar-thumb {
-      background-color: #df4090;
+  border-color: #e5e7eb;
 }
+
+.toast-notification:hover {
+  @apply shadow-lg;
+}
+
+/* Custom scrollbar for instructions panel */
+.instructions-panel {
+  scrollbar-width: thin;
+  scrollbar-color: #df4090 transparent;
+}
+
+.instructions-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.instructions-panel::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.instructions-panel::-webkit-scrollbar-thumb {
+  background-color: #df4090;
+  border-radius: 20px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+.dark .instructions-panel::-webkit-scrollbar-thumb {
+  background-color: #df4090;
+}
+
 /* Add fade-out animation */
 .fade-out {
   opacity: 0;
