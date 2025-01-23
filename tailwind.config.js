@@ -42,6 +42,21 @@ module.exports = {
           foreground: "hsl(var(--card-foreground))",
         },
       },
+      keyframes: {
+        'toast-in': {
+          '0%': { transform: 'translateY(100%)' },
+          '60%': { transform: 'translateY(-12px)' },
+          '100%': { transform: 'translateY(0)' }
+        },
+        'toast-out': {
+          '0%': { transform: 'translateY(0)' },
+          '100%': { transform: 'translateY(100%)' }
+        }
+      },
+      animation: {
+        'toast-in': 'toast-in 0.5s cubic-bezier(0.15, 1.15, 0.4, 1.2) forwards',
+        'toast-out': 'toast-out 0.4s ease-in-out forwards'
+      }
     },
   },
   plugins: [

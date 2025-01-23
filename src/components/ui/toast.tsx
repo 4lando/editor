@@ -16,7 +16,7 @@ const ToastViewport = React.forwardRef<
   <ToastPrimitives.Viewport
     ref={ref}
     className={cn(
-      "fixed bottom-4 z-[100] flex max-h-screen w-full flex-col items-center justify-center p-4",
+      "fixed bottom-4 left-1/2 z-[100] flex max-h-screen w-full -translate-x-1/2 flex-col items-center justify-center p-4",
       className
     )}
     {...props}
@@ -27,14 +27,10 @@ ToastViewport.displayName = ToastPrimitives.Viewport.displayName
 const toastVariants = cva(
   `group pointer-events-auto relative flex w-auto min-w-[300px] max-w-[500px]
    items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 shadow-lg
-   transition-all
-   data-[swipe=cancel]:translate-y-0
-   data-[swipe=end]:translate-y-[var(--radix-toast-swipe-end-y)]
-   data-[swipe=move]:translate-y-[var(--radix-toast-swipe-move-y)]
-   data-[swipe=move]:transition-none data-[state=open]:animate-in
-   data-[state=closed]:animate-out data-[state=closed]:fade-out-80
-   data-[state=closed]:slide-out-to-bottom-full
-   data-[state=open]:slide-in-from-bottom-full`,
+   translate-y-full
+   data-[state=open]:animate-toast-in
+   data-[state=closed]:animate-toast-out
+   motion-reduce:transition-none`,
   {
     variants: {
       variant: {
