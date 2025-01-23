@@ -87,17 +87,22 @@ The editor will be available at `https://editor.lndo.site/public`.
 The editor is automatically deployed to GitHub Pages when code is pushed to the main branch.
 You can access the live version at: https://4lando.github.io/editor/
 
+## Tech Stack
+
+- **Frontend Framework**: React 19
+- **Editor**: Monaco Editor
+- **UI Components**: Radix UI primitives, shadcn/ui, and Tailwind CSS
+- **State Management**: Zustand
+- **Build Tools**: Vite, PostCSS, Autoprefixer
+- **YAML Processing**: YAML parser and AJV schema validation
+
 ### Development Notes
 
-- Uses Vite for fast development and building
-- Monaco Editor for code editing capabilities
-- Tailwind CSS for styling
-- PostCSS for CSS processing
-- Custom theme based on Lando brand colors
-- For local schema development:
-  - You may place a copy of `landofile-spec.json` in the project root
-  - The editor will use this local file instead of fetching the remote schema
-  - Useful for testing schema changes without publishing
+- Fast development and production builds with Vite
+- Custom theme using Lando brand colors
+- Local schema development:
+  - Place `landofile-spec.json` in project root to override remote schema
+  - Useful for testing schema changes locally
 
 ## Contributing
 

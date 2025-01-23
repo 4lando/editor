@@ -45,6 +45,7 @@
             }
         });
     </script>
+    <link href="./src/index.css" rel="stylesheet">
     <link href="./src/style.css" rel="stylesheet">
 </head>
 
@@ -59,7 +60,7 @@
                             <div class="flex items-center gap-2">
                                 <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Landofile Editor</h1>
                                 <span
-                                    class="px-2 py-0.5 text-sm font-medium bg-[#df4090] text-white rounded-full">Beta</span>
+                                    class="px-2 py-0.5 text-sm font-medium bg-primary text-white rounded-full">Beta</span>
                             </div>
                             <p class="text-gray-600 dark:text-gray-400">A web-based YAML editor for Lando configuration
                                 files</p>
@@ -100,73 +101,17 @@
             <div class="flex flex-col lg:flex-row gap-8 h-full">
                 <!-- Editor Container -->
                 <div class="flex-1 min-w-0 lg:max-w-[calc(100%-20rem)] relative">
-                    <div id="editor"
-                        class="w-full h-[600px] border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg relative overflow-hidden">
-                        <!-- Loading overlay -->
+                    <div
+                        class="editor-wrapper w-full h-[600px] border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg relative overflow-hidden bg-white dark:bg-[#261D2D]">
                         <div id="editor-loader"
-                            class="absolute inset-0 bg-white dark:bg-[#261D2D] flex items-center justify-center z-50">
+                            class="absolute inset-0 flex items-center justify-center transition-opacity duration-500 ease-out z-50 bg-white dark:bg-[#261D2D]">
                             <div class="flex flex-col items-center gap-3">
-                                <div
-                                    class="w-10 h-10 border-4 border-[#df4090] border-t-transparent rounded-full animate-spin">
+                                <div class="w-10 h-10 border-4 border-[#df4090] border-t-transparent rounded-full animate-spin">
                                 </div>
                                 <p class="text-gray-600 dark:text-gray-400">Loading editor...</p>
                             </div>
                         </div>
-                        <button id="editor-menu-button"
-                            class="absolute top-2 right-2 z-20 p-2 rounded-md bg-white/10 hover:bg-white/20 transition-colors dark:bg-black/20 dark:hover:bg-black/40">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-600 dark:text-gray-300"
-                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                            </svg>
-                        </button>
-                        <div class="editor-drawer bg-[--c-bg-lighter] border-l border-gray-200 dark:border-gray-600">
-                            <div class="editor-drawer-content p-2">
-                                <div class="space-y-2">
-                                    <button id="open-file-btn"
-                                        class="w-full flex items-center gap-2.5 py-2 px-3 text-gray-700 dark:text-gray-200 rounded hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke="currentColor" class="w-5 h-5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z" />
-                                        </svg>
-                                        Open
-                                    </button>
-                                    <input type="file" id="file-input" accept=".yml,.yaml" class="hidden">
-                                    <button id="save-file-btn"
-                                        class="w-full flex items-center gap-2.5 py-2 px-3 text-gray-700 dark:text-gray-200 rounded hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke="currentColor" class="w-5 h-5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-                                        </svg>
-                                        Save
-                                    </button>
-                                    <button id="format-btn"
-                                        class="w-full flex items-center gap-2.5 py-2 px-3 text-gray-700 dark:text-gray-200 rounded hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke="currentColor" class="w-5 h-5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M4 6h16M4 12h16M4 18h7" />
-                                        </svg>
-                                        Format
-                                    </button>
-                                    <button id="share-btn"
-                                        class="w-full flex items-center gap-2.5 py-2 px-3 text-gray-700 dark:text-gray-200 rounded hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
-                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                            stroke="currentColor" class="w-5 h-5">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
-                                        </svg>
-                                        Share
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
                     </div>
-                    <p class="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                        Drag and drop a .lando.yml or .lando.*.yml file here to load it
-                    </p>
                 </div>
 
                 <!-- Instructions Panel -->
@@ -207,7 +152,8 @@
             </p>
         </footer>
     </div>
-    <script type="module" src="./src/main.js"></script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
 </body>
 
 </html>

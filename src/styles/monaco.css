@@ -1,0 +1,25 @@
+
+/* Monaco Editor container styles */
+.monaco-editor {
+  outline: none;
+}
+.monaco-editor .overflow-guard {
+  margin-top: 0.5rem;
+}
+
+/* Ensure Monaco Editor fills its container */
+.monaco-editor,
+.monaco-editor .overflow-guard {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Make sure Monaco editor has proper z-index */
+.monaco-editor {
+  z-index: 1;
+}
+
+/* Remove blue border from scrollbar */
+.monaco-editor .decorationsOverviewRuler {
+  display: none;
+}

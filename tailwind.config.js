@@ -1,26 +1,45 @@
 /** @type {import('tailwindcss').Config} */
-export default {
+module.exports = {
+  darkMode: ["class"],
   content: [
     "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx,css}",
+    "./src/**/*.{ts,tsx,js,jsx}",
   ],
-  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        pink: {
-          DEFAULT: '#df4090',
-          50: '#fdf2f7',
-          100: '#fce7f2',
-          200: '#fbd0e5',
-          300: '#f7aace',
-          400: '#f178ac',
-          500: '#df4090',
-          600: '#cc2672',
-          700: '#ad1d5d',
-          800: '#8f1b4f',
-          900: '#791b45',
-          950: '#4b0c27',
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
+        primary: {
+          DEFAULT: "hsl(var(--primary))",
+          foreground: "hsl(var(--primary-foreground))",
+        },
+        secondary: {
+          DEFAULT: "hsl(var(--secondary))",
+          foreground: "hsl(var(--secondary-foreground))",
+        },
+        destructive: {
+          DEFAULT: "hsl(var(--destructive) / <alpha-value>)",
+          foreground: "hsl(var(--destructive-foreground) / <alpha-value>)",
+        },
+        muted: {
+          DEFAULT: "hsl(var(--muted))",
+          foreground: "hsl(var(--muted-foreground))",
+        },
+        accent: {
+          DEFAULT: "hsl(var(--accent))",
+          foreground: "hsl(var(--accent-foreground))",
+        },
+        popover: {
+          DEFAULT: "hsl(var(--popover))",
+          foreground: "hsl(var(--popover-foreground))",
+        },
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
         },
       },
     },
@@ -28,4 +47,4 @@ export default {
   plugins: [
     require('@tailwindcss/typography'),
   ],
-} 
+}

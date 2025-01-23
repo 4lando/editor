@@ -1,5 +1,5 @@
 import { debug } from './debug';
-import { formatYaml } from './format';
+import { formatYaml } from './lib/format-yaml';
 import { parseDocument } from 'yaml';
 import { compressToEncodedURIComponent, decompressFromEncodedURIComponent } from 'lz-string';
 
@@ -29,7 +29,7 @@ export function generateShareUrl(content) {
   try {
     // Format content before sharing
     let formatted = formatYaml(content);
-    
+
     // Parse as YAML to preserve comments
     const doc = parseDocument(formatted, {
       keepBlobsInJSON: true,
@@ -44,13 +44,13 @@ export function generateShareUrl(content) {
       minContentWidth: 0,
       doubleQuotedAsJSON: false,
     });
-    
+
     // Apply compression map
     let compressed = yamlStr;
     Object.entries(compressionMap).forEach(([key, value]) => {
       compressed = compressed.replaceAll(key, value);
     });
-    
+
     // Compress the shortened content
     const encoded = compressToEncodedURIComponent(compressed);
     const url = new URL(window.location.href);
@@ -67,7 +67,7 @@ export function getSharedContent() {
     const url = new URL(window.location.href);
     const encoded = url.searchParams.get('s');
     if (!encoded) return null;
-    
+
     let content = decompressFromEncodedURIComponent(encoded);
     if (!content) return null;
 
@@ -75,14 +75,14 @@ export function getSharedContent() {
     Object.entries(compressionMap).forEach(([key, value]) => {
       content = content.replaceAll(value, key);
     });
-    
+
     // Parse and re-stringify to ensure proper formatting
     const doc = parseDocument(content, {
       keepBlobsInJSON: true,
       keepCstNodes: true,
       keepNodeTypes: true,
     });
-    
+
     return doc.toString({
       indent: 2,
       lineWidth: 0,
@@ -93,4 +93,4 @@ export function getSharedContent() {
     debug.error('Failed to get shared content:', error);
     return null;
   }
-} 
+}

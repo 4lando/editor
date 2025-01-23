@@ -1,8 +1,3 @@
-/* Tailwind directives */
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 /* Custom properties */
 :root {
   --c-bg: #f3f4f6;
@@ -22,32 +17,9 @@ body {
   min-height: 100vh;
 }
 
-/* Monaco Editor container styles */
-#editor {
-  position: relative;
-  min-height: 600px;
-  height: 600px;
-  width: 100%;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
-  overflow: hidden;
-  background-color: var(--c-bg);
-  z-index: 1;
-}
-
-.monaco-editor .overflow-guard {
-  margin-top: 0.5rem;
-}
-
-/* Ensure Monaco Editor fills its container */
-.monaco-editor,
-.monaco-editor .overflow-guard {
-  width: 100% !important;
-  height: 100% !important;
-}
-
-/* Add styles for drag and drop visual feedback */
-#editor.drag-over::after {
+/* Update drag and drop styles to target the main container */
+.monaco-editor-container.drag-over::after,
+.editor-container .monaco-editor-container:has(+ .drag-over)::after {
   content: 'Drop .lando.yml or .lando.*.yml file here';
   position: absolute;
   top: 0;
@@ -64,17 +36,9 @@ body {
   z-index: 10;
 }
 
-.dark #editor.drag-over::after {
+.dark .monaco-editor-container.drag-over::after,
+.dark .editor-container .monaco-editor-container:has(+ .drag-over)::after {
   background: rgba(255, 255, 255, 0.15);
-}
-
-/* Add fade-out animation for the loader */
-#editor-loader {
-  transition: opacity 0.3s ease-out;
-}
-
-#editor-loader.fade-out {
-  opacity: 0;
 }
 
 .editor-drawer {
@@ -168,7 +132,64 @@ body {
   transition: opacity 0.3s ease-out;
 }
 
-/* Make sure Monaco editor has proper z-index */
-.monaco-editor {
-  z-index: 1;
+/* Toast animations */
+@keyframes slideInFromBottom {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOutToBottom {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+/* Toast peek styles */
+.toast-peek {
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  z-index: 49;
+  transition: all 0.4s cubic-bezier(0.15, 1.15, 0.4, 1.2);
+  min-width: 300px;
+  max-width: 500px;
+  background-color: var(--c-bg-lighter);
+}
+
+.toast-peek.show {
+  transform: translateX(-50%) translateY(calc(100% - 4px));
+}
+
+/* Update title and description styles */
+.toast-title {
+  @apply text-base font-semibold;
+}
+
+.toast-description {
+  @apply text-base opacity-90;
+}
+
+/* Remove redundant dark mode styles since we're using theme variables */
+
+/* Override Radix UI animations */
+[data-state="open"][data-swipe="end"] {
+  animation: slideInFromBottom 0.4s cubic-bezier(0.15, 1.15, 0.4, 1.2);
+}
+
+[data-state="closed"][data-swipe="end"] {
+  animation: slideOutToBottom 0.4s cubic-bezier(0.15, 1.15, 0.4, 1.2);
 }

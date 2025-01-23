@@ -1,5 +1,6 @@
+import * as monaco from 'monaco-editor';
 import { parse, stringify, parseDocument } from 'yaml';
-import { debug } from './debug';
+import { debug } from '../debug';
 
 export function formatYaml(content) {
   try {
@@ -84,5 +85,56 @@ function formatNode(node) {
       if (pair.key) formatNode(pair.key);
       if (pair.value) formatNode(pair.value);
     });
+  }
+}
+
+export function setupYamlFormatting(editor, toast) {
+  // Add format action to context menu
+  editor.addAction({
+    id: 'format-yaml',
+    label: 'Format Document',
+    keybindings: [
+      monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyF,
+    ],
+    contextMenuGroupId: '1_modification',
+    contextMenuOrder: 1.5,
+    run: () => formatDocument(editor, toast),
+  });
+}
+
+export function formatDocument(editor, toast) {
+  try {
+    const content = editor.getValue();
+    const formatted = formatYaml(content);
+    editor.executeEdits('format', [{
+      range: editor.getModel().getFullModelRange(),
+      text: formatted,
+    }]);
+    debug.log('YAML formatted successfully');
+
+    toast({
+      description: 'Document formatted successfully',
+      duration: 2000,
+    });
+  } catch (error) {
+    debug.error('Format failed:', error);
+    const errorMatch = error.message.match(/at line (\d+), column (\d+)/i);
+    const startLine = errorMatch ? parseInt(errorMatch[1]) : 1;
+    const startCol = errorMatch ? parseInt(errorMatch[2]) : 1;
+
+    toast({
+      description: `Failed to format: ${error.message}`,
+      duration: 5000,
+      className: 'bg-red-50 dark:bg-red-900/10 text-red-800 dark:text-red-200',
+    });
+
+    monaco.editor.setModelMarkers(editor.getModel(), 'yaml', [{
+      severity: MarkerSeverity.Error,
+      message: `Failed to format: ${error.message}`,
+      startLineNumber: startLine,
+      startColumn: startCol,
+      endLineNumber: startLine,
+      endColumn: startCol + 1,
+    }]);
   }
 }
