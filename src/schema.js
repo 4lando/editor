@@ -52,7 +52,7 @@ export async function loadSchema() {
     if (!schema) {
       const schemaUrl = 'https://4lando.github.io/lando-spec/landofile-spec.json';
       debug.log('Fetching schema from:', schemaUrl);
-      
+
       const response = await fetch(schemaUrl);
       if (!response.ok) {
         debug.error('Schema fetch failed:', {
@@ -62,24 +62,24 @@ export async function loadSchema() {
         });
         return null;
       }
-      
+
       schema = await response.json();
       debug.log('Remote schema loaded:', schema);
     }
-    
+
     if (!schema || typeof schema !== 'object') {
       debug.error('Invalid schema format:', schema);
       return null;
     }
-    
+
     // Store schema definitions for hover support
     schemaDefinitions = flattenSchema(schema);
     debug.log('Schema definitions:', schemaDefinitions);
-    
+
     // Remove $id to prevent Ajv from caching it
     const schemaToCompile = { ...schema };
     delete schemaToCompile.$id;
-    
+
     // Verify schema can be compiled
     try {
       ajv.compile(schemaToCompile);
@@ -117,7 +117,7 @@ function flattenSchema(schema, prefix = '', result = {}, visited = new Set(), ro
     debug.log('Resolving $ref:', schema.$ref);
     const refPath = schema.$ref.replace('#/', '').split('/');
     let refSchema = rootSchema;
-    
+
     for (const part of refPath) {
       if (!refSchema[part]) {
         debug.warn('Failed to resolve ref part:', part);
@@ -125,7 +125,7 @@ function flattenSchema(schema, prefix = '', result = {}, visited = new Set(), ro
       }
       refSchema = refSchema[part];
     }
-    
+
     // Merge properties from the referenced schema, but don't override existing ones
     const merged = {
       ...refSchema,
@@ -143,12 +143,12 @@ function flattenSchema(schema, prefix = '', result = {}, visited = new Set(), ro
     Object.entries(schema.patternProperties).forEach(([pattern, value]) => {
       const wildcardPath = prefix ? `${prefix}/*` : '*';
       debug.log('Processing pattern:', pattern, 'at path:', wildcardPath);
-      
+
       // First resolve any references in the pattern property value
       if (value.$ref) {
         const refPath = value.$ref.replace('#/', '').split('/');
         let refSchema = rootSchema;
-        
+
         for (const part of refPath) {
           if (!refSchema[part]) {
             debug.warn('Failed to resolve ref part:', part);
@@ -156,7 +156,7 @@ function flattenSchema(schema, prefix = '', result = {}, visited = new Set(), ro
           }
           refSchema = refSchema[part];
         }
-        
+
         // Create a new object for the pattern property to avoid sharing references
         result[wildcardPath] = {
           description: refSchema.description || '',
@@ -204,7 +204,7 @@ function flattenSchema(schema, prefix = '', result = {}, visited = new Set(), ro
         oneOf: value.oneOf || [],
         additionalProperties: value.additionalProperties,
       };
-      
+
       // Continue flattening nested schemas
       flattenSchema(value, path, result, visited, rootSchema);
     });
@@ -221,7 +221,7 @@ function flattenSchema(schema, prefix = '', result = {}, visited = new Set(), ro
       additionalProperties: schema.additionalProperties,
     };
   }
-  
+
   // Process $defs
   if (schema.$defs) {
     debug.log('Processing $defs');
@@ -231,7 +231,7 @@ function flattenSchema(schema, prefix = '', result = {}, visited = new Set(), ro
       flattenSchema(value, defsPath, result, visited, rootSchema);
     });
   }
-  
+
   return result;
 }
 
@@ -242,7 +242,7 @@ function formatExample(key, example) {
       const obj = { [key]: example };
       return YAML.stringify(obj).trim();
     }
-    
+
     // For primitive types, format as YAML key-value pair
     return `${key}: ${YAML.stringify(example)}`;
   } catch (error) {
@@ -257,20 +257,20 @@ export function getHoverInfo(content, position) {
     const lines = content.split('\n');
     const line = lines[position.lineNumber - 1];
     const match = line.match(/^(\s*)(\w+):/);
-    
+
     if (match) {
       const [, indent, key] = match;
       const level = indent.length / 2;
-      
+
       // Build path to current key
       const path = findPathAtPosition(content, position);
-      
+
       debug.log('Looking up hover info for path:', path);
-      
+
       // Try to find schema info using different path patterns
       let info = null;
       const possiblePaths = generatePossiblePaths(path);
-      
+
       for (const schemaPath of possiblePaths) {
         debug.log('Trying schema path:', schemaPath);
         if (schemaDefinitions && schemaDefinitions[schemaPath]) {
@@ -279,25 +279,25 @@ export function getHoverInfo(content, position) {
           break;
         }
       }
-      
+
       if (info) {
         let contents = [];
-        
+
         // Description
         if (info.description) {
           contents.push({ value: info.description });
         }
-        
+
         // Type information
         if (info.type) {
           contents.push({ value: `Type: ${info.type}` });
         }
-        
+
         // Pattern (for pattern properties)
         if (info.pattern) {
           contents.push({ value: `Pattern: ${info.pattern}` });
         }
-        
+
         // Enum values
         if (info.enum && info.enum.length) {
           contents.push({ value: `Allowed values: ${info.enum.join(', ')}` });
@@ -310,7 +310,7 @@ export function getHoverInfo(content, position) {
             value: '```yaml\n' + formatExample(key, info.default) + '\n```'
           });
         }
-        
+
         // Examples
         if (info.examples && info.examples.length) {
           contents.push({ value: '\nExamples:' });
@@ -320,7 +320,7 @@ export function getHoverInfo(content, position) {
             });
           });
         }
-        
+
         // OneOf options
         if (info.oneOf && info.oneOf.length) {
           contents.push({ value: '\nPossible Formats:' });
@@ -330,7 +330,7 @@ export function getHoverInfo(content, position) {
             }
           });
         }
-        
+
         return {
           contents,
           range: {
@@ -351,12 +351,12 @@ export function getHoverInfo(content, position) {
 // Helper function to generate possible schema paths including wildcards
 function generatePossiblePaths(path) {
   const paths = [];
-  
+
   // Start with the most specific full path
   if (path.length > 0) {
     paths.push(path.join('/'));
   }
-  
+
   // Then try wildcard variations, still maintaining specificity
   if (path.length > 1) {
     // For a path like ['services', 'node', 'type'], try:
@@ -372,10 +372,10 @@ function generatePossiblePaths(path) {
       paths.push(wildcardPath);
     }
   }
-  
+
   // Add root level wildcard last (lowest priority)
   paths.push('*');
-  
+
   debug.log('Generated possible paths:', paths);
   return paths.filter(Boolean); // Remove any empty paths
 }
@@ -384,7 +384,7 @@ export function validateYaml(content, schema) {
   try {
     debug.log('Parsing YAML content:', content);
     let parsed = YAML.parse(content);
-    
+
     // Convert undefined/null values after colons to empty objects
     const lines = content.split('\n');
     lines.forEach((line, index) => {
@@ -393,7 +393,7 @@ export function validateYaml(content, schema) {
         // If we have a key with nothing after the colon
         const [, indent, key] = match;
         const path = findPathAtPosition(content, { lineNumber: index + 1 });
-        
+
         // Build the path to this property
         let current = parsed = parsed || {};
         path.forEach((segment, i) => {
@@ -405,7 +405,7 @@ export function validateYaml(content, schema) {
             current = current[segment];
           }
         });
-        
+
         // Set empty object for the current key if it's undefined
         if (path.length === 0) {
           parsed[key] = parsed[key] ?? {};
@@ -423,50 +423,58 @@ export function validateYaml(content, schema) {
 
     if (!valid) {
       debug.log('Schema validation errors:', validate.errors);
-      return validate.errors.map(error => {
-        // Handle different error types
-        if (error.keyword === 'additionalProperties') {
-          // Find the location of the unexpected property
-          const path = error.instancePath.split('/').filter(Boolean);
-          const unexpectedProp = error.params.additionalProperty;
-          path.push(unexpectedProp); // Add the unexpected property to the path
-          const location = findLocationInYaml(content, path);
-          
-          return {
-            startLineNumber: location.line,
-            endLineNumber: location.line,
-            startColumn: location.column,
-            endColumn: location.column + unexpectedProp.length,
-            message: `Unexpected property "${unexpectedProp}"`,
-            severity: MarkerSeverity.Error,
-            source: 'JSON Schema'
-          };
-        }
 
-        // Handle other validation errors
+      // Group errors by location to prevent duplicates
+      const errorsByLocation = new Map();
+
+      validate.errors.forEach(error => {
         const path = error.instancePath.split('/').filter(Boolean);
         const location = findLocationInYaml(content, path);
-        
-        return {
-          startLineNumber: location.line,
-          endLineNumber: location.line,
-          startColumn: location.column,
-          endColumn: location.column + (location.length || 1),
-          message: `${error.message} at ${error.instancePath || 'root'}`,
-          severity: MarkerSeverity.Error,
-          source: 'JSON Schema'
-        };
+        const locationKey = `${location.line}:${location.column}`;
+
+        // Only keep the first error for each location
+        if (!errorsByLocation.has(locationKey)) {
+          if (error.keyword === 'additionalProperties') {
+            // Find the location of the unexpected property
+            const path = error.instancePath.split('/').filter(Boolean);
+            const unexpectedProp = error.params.additionalProperty;
+            path.push(unexpectedProp); // Add the unexpected property to the path
+            const location = findLocationInYaml(content, path);
+
+            errorsByLocation.set(locationKey, {
+              startLineNumber: location.line,
+              endLineNumber: location.line,
+              startColumn: location.column,
+              endColumn: location.column + unexpectedProp.length,
+              message: `Unexpected property "${unexpectedProp}"`,
+              severity: MarkerSeverity.Error,
+              source: 'JSON Schema'
+            });
+          } else {
+            errorsByLocation.set(locationKey, {
+              startLineNumber: location.line,
+              endLineNumber: location.line,
+              startColumn: location.column,
+              endColumn: location.column + (location.length || 1),
+              message: error.instancePath ? `${error.instancePath.split('/').pop()} ${error.message} at ${error.instancePath}` : error.message,
+              severity: MarkerSeverity.Error,
+              source: 'JSON Schema'
+            });
+          }
+        }
       });
+
+      return Array.from(errorsByLocation.values());
     }
 
     return [];
   } catch (error) {
     debug.warn('YAML parsing error:', error);
-    
+
     if (error instanceof YAML.YAMLParseError) {
       const { message, pos, linePos } = error;
       debug.log('Parse error details:', { message, pos, linePos });
-      
+
       return [{
         startLineNumber: linePos ? linePos[0].line : 1,
         endLineNumber: linePos ? linePos[1].line : 1,
@@ -477,7 +485,7 @@ export function validateYaml(content, schema) {
         source: 'YAML Parser'
       }];
     }
-    
+
     return [{
       startLineNumber: 1,
       startColumn: 1,
@@ -494,25 +502,56 @@ function findLocationInYaml(content, path) {
   const lines = content.split('\n');
   let currentLine = 0;
   let currentPath = [];
+  let arrayIndex = 0;
+  let currentArrayPath = null;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    const match = line.match(/^(\s*)(\w+):/);
-    
-    if (match) {
-      const [, indent, key] = match;
-      const level = indent.length / 2;
-      
-      // Update current path based on indentation
-      currentPath = currentPath.slice(0, level);
-      currentPath[level] = key;
 
-      if (pathsMatch(currentPath, path)) {
+    // Handle array items
+    const arrayMatch = line.match(/^(\s*)-/);
+    if (arrayMatch) {
+      const [, indent] = arrayMatch;
+      const level = indent.length / 2;
+
+      // Reset array index when starting a new array at a different path
+      if (currentArrayPath !== level) {
+        arrayIndex = 0;
+        currentArrayPath = level;
+      } else {
+        arrayIndex++;
+      }
+
+      // Check if this array index matches our path
+      const targetIndex = parseInt(path[level]);
+      if (!isNaN(targetIndex) && targetIndex === arrayIndex) {
         return {
           line: i + 1,
           column: indent.length + 1,
-          length: key.length
+          length: line.length - indent.length
         };
+      }
+    } else {
+      // Reset array tracking when we're not in an array
+      currentArrayPath = null;
+      arrayIndex = 0;
+
+    // Handle regular object properties
+      const match = line.match(/^(\s*)(\w+):/);
+      if (match) {
+        const [, indent, key] = match;
+        const level = indent.length / 2;
+
+        currentPath = currentPath.slice(0, level);
+        currentPath[level] = key;
+
+        if (pathsMatch(currentPath, path)) {
+          return {
+            line: i + 1,
+            column: indent.length + 1,
+            length: key.length
+          };
+        }
       }
     }
   }
@@ -527,21 +566,21 @@ function pathsMatch(currentPath, targetPath) {
 function findPathAtPosition(content, position) {
   const lines = content.split('\n');
   let currentPath = [];
-  
+
   for (let i = 0; i < position.lineNumber; i++) {
     const line = lines[i];
     const match = line.match(/^(\s*)(\w+):/);
-    
+
     if (match) {
       const [, indent, key] = match;
       const level = indent.length / 2;
-      
+
       // Update current path based on indentation
       currentPath = currentPath.slice(0, level);
       currentPath[level] = key;
     }
   }
-  
+
   return currentPath.filter(Boolean);
 }
 
@@ -697,7 +736,7 @@ function getCompletionsForSchema(schema, range) {
 
 function formatPropertyDocs(prop) {
   const parts = [];
-  
+
   if (prop.description) {
     parts.push(prop.description);
   }
@@ -744,16 +783,16 @@ function createInsertText(key, prop) {
 
 function getSchemaAtPath(schema, path) {
   let current = schema;
-  
+
   for (const segment of path) {
     if (!current) return null;
-    
+
     // Check properties first
     if (current.properties?.[segment]) {
       current = current.properties[segment];
       continue;
     }
-    
+
     // Check pattern properties
     if (current.patternProperties) {
       const patternMatch = Object.entries(current.patternProperties)
@@ -763,7 +802,7 @@ function getSchemaAtPath(schema, path) {
         continue;
       }
     }
-    
+
     // Check if we have a $ref
     if (current.$ref) {
       const refSchema = resolveRef(current.$ref, schema);
@@ -772,24 +811,24 @@ function getSchemaAtPath(schema, path) {
         continue;
       }
     }
-    
+
     return null;
   }
-  
+
   return current;
 }
 
 function resolveRef($ref, rootSchema) {
   const path = $ref.replace('#/', '').split('/');
   let current = rootSchema;
-  
+
   for (const segment of path) {
     if (!current[segment]) return null;
     current = current[segment];
   }
-  
+
   return current;
 }
 
 // Export the new function
-export { getCompletionItems, schemaDefinitions }; 
+export { getCompletionItems, schemaDefinitions };
