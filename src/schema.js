@@ -382,6 +382,11 @@ function generatePossiblePaths(path) {
 
 export function validateYaml(content, schema) {
   try {
+    // Skip validation for empty content
+    if (!content.trim()) {
+      return [];
+    }
+
     debug.log('Parsing YAML content:', content);
     let parsed = YAML.parse(content);
 

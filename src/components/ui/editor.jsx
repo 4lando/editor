@@ -13,6 +13,7 @@ import { generateShareUrl, getSharedContent } from '../../share';
 import { showShareDialog } from '../../lib/dialog';
 import { registerCompletionProvider } from '../../completions';
 import { EditorMenu } from './editor-menu';
+import { saveEditorContent, loadEditorContent } from '../../lib/storage';
 
 export function Editor() {
   const containerRef = useRef(null);
@@ -237,6 +238,19 @@ export function Editor() {
   };
 
   const getDefaultContent = () => {
+    // First try to load shared content
+    const sharedContent = getSharedContent();
+    if (sharedContent) {
+      return sharedContent;
+    }
+
+    // Then try to load from local storage
+    const savedContent = loadEditorContent();
+    if (savedContent) {
+      return savedContent;
+    }
+
+    // Fall back to default template
     return `name: my-lando-app
 recipe: lamp
 config:
@@ -354,6 +368,15 @@ services:
         }
       });
     }
+
+    // Add content change listener to save to localStorage
+    editorRef.current.onDidChangeModelContent(() => {
+      debug.log('Content changed, saving to localStorage...');
+      const content = editorRef.current.getValue();
+      saveEditorContent(content);
+      // Existing validation call
+      updateDiagnostics();
+    });
   };
 
   return (
