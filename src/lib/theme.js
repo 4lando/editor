@@ -1,5 +1,5 @@
 import * as monaco from 'monaco-editor';
-import { debug } from './debug';
+import { debug } from '../debug';
 
 // Define Lando theme colors
 const landoTheme = {
@@ -7,8 +7,8 @@ const landoTheme = {
   inherit: true,
   rules: [
     { token: '', foreground: 'f8f8f2' },
-    { token: 'key', foreground: 'df4090' },
-    { token: 'type.yaml', foreground: 'df4090' },
+    { token: 'key', foreground: 'de3f8f' },
+    { token: 'type.yaml', foreground: 'de3f8f' },
     { token: 'string.yaml', foreground: 'f1fa8c' },
     { token: 'number.yaml', foreground: 'bd93f9' },
     { token: 'keyword.yaml', foreground: 'bd93f9' },
@@ -38,13 +38,17 @@ const landoTheme = {
     'editorHint.foreground': '#50fa7b',
     'editorBracketMatch.background': '#44475a',
     'editorBracketMatch.border': '#dd3f8f',
+    'editorHoverWidget.background': '#382A3D',
+    'editorHoverWidget.border': '#de3f8f',
+    'editorHoverWidget.foreground': '#f8f8f2',
+    'editorHoverWidget.statusBarBackground': '#382A3D',
   },
 };
 
 export function initTheme() {
   debug.log('Registering Lando theme...');
   monaco.editor.defineTheme('lando', landoTheme);
-  
+
   // Set initial Monaco theme based on current dark mode state
   const isDark = document.documentElement.classList.contains('dark');
   debug.log('Initial theme:', isDark ? 'dark' : 'light');
@@ -53,7 +57,7 @@ export function initTheme() {
   window.addEventListener('themechange', (e) => {
     const isDark = e.detail.isDark;
     debug.log('Theme changed to:', isDark ? 'dark' : 'light');
-    
+
     // Update Monaco Editor theme
     const editors = monaco.editor.getEditors();
     editors.forEach(editor => {
@@ -62,4 +66,4 @@ export function initTheme() {
       });
     });
   });
-} 
+}

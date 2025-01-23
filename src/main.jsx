@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom/client'
 import App from './App'
-import { initTheme } from './theme'
+import { initTheme } from './lib/theme'
 import './index.css'
 import './style.css'
 
