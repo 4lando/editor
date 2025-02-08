@@ -1,5 +1,5 @@
-import * as monaco from "monaco-editor";
 import { debug } from "@/lib/debug";
+import * as monaco from "monaco-editor";
 
 /**
  * @typedef {Object} ThemeRule

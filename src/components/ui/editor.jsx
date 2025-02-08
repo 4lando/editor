@@ -1,20 +1,20 @@
-import React, { useEffect, useRef, useState } from "react";
 import * as monaco from "monaco-editor";
-import { MarkerSeverity } from "monaco-editor/esm/vs/platform/markers/common/markers";
 import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
 import jsonWorker from "monaco-editor/esm/vs/language/json/json.worker?worker";
+import { MarkerSeverity } from "monaco-editor/esm/vs/platform/markers/common/markers";
+import React, { useEffect, useRef, useState } from "react";
 import "monaco-editor/esm/vs/basic-languages/yaml/yaml.contribution";
+import { useToast } from "@/hooks/use-toast";
+import { debug } from "@/lib/debug";
+import { getEditorOptions } from "@/lib/editor-config";
+import { formatYaml } from "@/lib/format-yaml";
 import {
   setupEditorFeatures,
   updateDiagnostics,
 } from "@/lib/schema-validation";
-import { debug } from "@/lib/debug";
-import { formatYaml } from "@/lib/format-yaml";
-import { useToast } from "@/hooks/use-toast";
 import { getSharedContent } from "@/lib/share";
-import { EditorMenu } from "./editor-menu";
 import { saveEditorContent } from "@/lib/storage";
-import { getEditorOptions } from "@/lib/editor-config";
+import { EditorMenu } from "./editor-menu";
 
 /**
  * @fileoverview

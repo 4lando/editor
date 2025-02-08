@@ -1,10 +1,10 @@
-import React from "react";
+import { debug } from "@/lib/debug";
+import { showShareDialog } from "@/lib/dialog";
+import { formatDocument, formatYaml } from "@/lib/format-yaml";
+import { generateShareUrl } from "@/lib/share";
 import * as monaco from "monaco-editor";
 import { MarkerSeverity } from "monaco-editor/esm/vs/platform/markers/common/markers";
-import { formatYaml, formatDocument } from "@/lib/format-yaml";
-import { generateShareUrl } from "@/lib/share";
-import { showShareDialog } from "@/lib/dialog";
-import { debug } from "@/lib/debug";
+import React from "react";
 
 export function EditorMenu({ editor, toast, isOpen, onToggle }) {
   const handleFormat = () => {

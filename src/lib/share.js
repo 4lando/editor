@@ -1,10 +1,10 @@
 import { debug } from "@/lib/debug";
 import { formatYaml } from "@/lib/format-yaml";
-import { parseDocument } from "yaml";
 import {
   compressToEncodedURIComponent,
   decompressFromEncodedURIComponent,
 } from "lz-string";
+import { parseDocument } from "yaml";
 
 // Common YAML strings to replace with shorter versions
 const compressionMap = {
