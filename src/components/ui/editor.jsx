@@ -11,6 +11,7 @@ import { formatYaml } from "@/lib/format-yaml";
 import {
   setupEditorFeatures,
   updateDiagnostics,
+  compiledSchema,
 } from "@/lib/schema-validation";
 import { getSharedContent } from "@/lib/share";
 import { saveEditorContent } from "@/lib/storage";
@@ -311,8 +312,11 @@ export function Editor() {
       debug.log("Content changed, saving to localStorage...");
       const content = editorRef.current.getValue();
       saveEditorContent(content);
-      // Existing validation call
-      updateDiagnostics();
+
+      if (typeof updateDiagnostics === "function" && compiledSchema) {
+        // Only call updateDiagnostics if it's available and we have a schema
+        updateDiagnostics(editorRef.current, compiledSchema);
+      }
     });
   };
 

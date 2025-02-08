@@ -6,3 +6,10 @@ export const MarkerSeverity = {
   Warning: monaco.MarkerSeverity.Warning,
   Error: monaco.MarkerSeverity.Error,
 };
+
+export const SeveritySymbols = {
+  [monaco.MarkerSeverity.Hint]: "💡",
+  [monaco.MarkerSeverity.Info]: "ℹ️",
+  [monaco.MarkerSeverity.Warning]: "⚠️",
+  [monaco.MarkerSeverity.Error]: "❌",
+};
