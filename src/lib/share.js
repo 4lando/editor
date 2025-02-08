@@ -1,28 +1,31 @@
-import { debug } from './debug';
-import { formatYaml } from './lib/format-yaml';
-import { parseDocument } from 'yaml';
-import { compressToEncodedURIComponent, decompressFromEncodedURIComponent } from 'lz-string';
+import { debug } from "@/lib/debug";
+import { formatYaml } from "@/lib/format-yaml";
+import { parseDocument } from "yaml";
+import {
+  compressToEncodedURIComponent,
+  decompressFromEncodedURIComponent,
+} from "lz-string";
 
 // Common YAML strings to replace with shorter versions
 const compressionMap = {
-  'recipe: ': '~rp:',
-  'config: ': '~cp:',
-  'services: ': '~ss:',
-  'webroot: ': '~wr:',
-  'database: ': '~db:',
-  'type: ': '~t:',
-  'build: ': '~b:',
-  'command: ': '~cm:',
-  'port: ': '~pt:',
-  'name: ': '~n:',
-  'tooling:': '~tl:',
-  'service:': '~s:',
-  'description:': '~dsc:',
-  'environment:': '~e:',
-  'image:': '~i:',
-  'volumes:': '~v:',
-  ': false': ': f',
-  ': true': ': t',
+  "recipe: ": "~rp:",
+  "config: ": "~cp:",
+  "services: ": "~ss:",
+  "webroot: ": "~wr:",
+  "database: ": "~db:",
+  "type: ": "~t:",
+  "build: ": "~b:",
+  "command: ": "~cm:",
+  "port: ": "~pt:",
+  "name: ": "~n:",
+  "tooling:": "~tl:",
+  "service:": "~s:",
+  "description:": "~dsc:",
+  "environment:": "~e:",
+  "image:": "~i:",
+  "volumes:": "~v:",
+  ": false": ": f",
+  ": true": ": t",
 };
 
 export function generateShareUrl(content) {
@@ -54,10 +57,10 @@ export function generateShareUrl(content) {
     // Compress the shortened content
     const encoded = compressToEncodedURIComponent(compressed);
     const url = new URL(window.location.href);
-    url.searchParams.set('s', encoded);
+    url.searchParams.set("s", encoded);
     return url.toString();
   } catch (error) {
-    debug.error('Failed to generate share URL:', error);
+    debug.error("Failed to generate share URL:", error);
     throw error;
   }
 }
@@ -65,7 +68,7 @@ export function generateShareUrl(content) {
 export function getSharedContent() {
   try {
     const url = new URL(window.location.href);
-    const encoded = url.searchParams.get('s');
+    const encoded = url.searchParams.get("s");
     if (!encoded) return null;
 
     let content = decompressFromEncodedURIComponent(encoded);
@@ -90,7 +93,7 @@ export function getSharedContent() {
       doubleQuotedAsJSON: false,
     });
   } catch (error) {
-    debug.error('Failed to get shared content:', error);
+    debug.error("Failed to get shared content:", error);
     return null;
   }
 }

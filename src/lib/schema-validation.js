@@ -1,9 +1,10 @@
 import * as YAML from "yaml";
 import Ajv from "ajv";
 import { TokenizationRegistry } from "monaco-editor/esm/vs/editor/common/languages";
-import { registerCompletionProvider } from "./completions";
-import { debug } from "./debug";
-import { MarkerSeverity } from "./constants";
+import { registerCompletionProvider } from "@/lib/completions";
+import { setupYamlFormatting } from "@/lib/format-yaml";
+import { debug } from "@/lib/debug";
+import { MarkerSeverity } from "@/lib/constants";
 import * as monaco from "monaco-editor";
 
 /**
@@ -801,7 +802,9 @@ function getCompletionsForSchema(schema, range) {
 
     // Handle pattern properties
     if (currentSchema.patternProperties) {
-      for (const [pattern, prop] of Object.entries(currentSchema.patternProperties)) {
+      for (const [pattern, prop] of Object.entries(
+        currentSchema.patternProperties,
+      )) {
         if (prop.examples) {
           suggestions.push(
             ...prop.examples.map((example) => ({
@@ -976,9 +979,11 @@ function resolveRef($ref, rootSchema) {
  * - Schema validation
  * - Completion provider
  * - YAML formatting
+ * @param {import('monaco-editor').editor.IStandaloneCodeEditor} editor - The Monaco editor instance
+ * @param {Function} toast - Toast notification function
  * @returns {Promise<void>}
  */
-const setupEditorFeatures = async () => {
+const setupEditorFeatures = async (editor, toast) => {
   // Set up YAML tokenization
   const existingTokensProvider = TokenizationRegistry.get("yaml");
   if (existingTokensProvider) {
@@ -1015,10 +1020,10 @@ const setupEditorFeatures = async () => {
   const schemaContent = await loadSchema();
 
   if (!schemaContent) {
-    handleSchemaLoadFailure();
+    handleSchemaLoadFailure(editor);
   } else {
     debug.log("Schema loaded successfully");
-    setupSchemaValidation(schemaContent);
+    setupSchemaValidation(editor, schemaContent);
   }
 
   // Register YAML completion provider
@@ -1027,15 +1032,16 @@ const setupEditorFeatures = async () => {
   }
 
   // Add format action setup
-  setupYamlFormatting(editorRef.current, toast);
+  setupYamlFormatting(editor, toast);
 };
 
 /**
  * Handles schema loading failure by displaying a warning marker
+ * @param {import('monaco-editor').editor.IStandaloneCodeEditor} editor - The Monaco editor instance
  */
-const handleSchemaLoadFailure = () => {
+const handleSchemaLoadFailure = (editor) => {
   debug.warn("Schema failed to load - editor will continue without validation");
-  monaco.editor.setModelMarkers(editorRef.current.getModel(), "yaml", [
+  monaco.editor.setModelMarkers(editor.getModel(), "yaml", [
     {
       severity: MarkerSeverity.Warning,
       message: "Schema validation unavailable - schema failed to load",
@@ -1048,34 +1054,36 @@ const handleSchemaLoadFailure = () => {
 };
 
 /**
+ * Updates the diagnostics for the YAML content
+ * @param {import('monaco-editor').editor.IStandaloneCodeEditor} editor - The Monaco editor instance
+ * @param {Object} schemaContent - The schema content for validation
+ */
+const updateDiagnostics = (editor, schemaContent) => {
+  const content = editor.getValue();
+  try {
+    debug.log("Validating YAML content...");
+    const diagnostics = validateYaml(content, schemaContent);
+    debug.log("Validation results:", diagnostics);
+    monaco.editor.setModelMarkers(editor.getModel(), "yaml", diagnostics);
+  } catch (e) {
+    debug.error("Validation error:", e);
+  }
+};
+
+/**
  * Configures schema validation and sets up content change listeners
+ * @param {import('monaco-editor').editor.IStandaloneCodeEditor} editor - The Monaco editor instance
  * @param {Object} schemaContent - The loaded schema content
  */
-const setupSchemaValidation = (schemaContent) => {
-  const updateDiagnostics = () => {
-    const content = editorRef.current.getValue();
-    try {
-      debug.log("Validating YAML content...");
-      const diagnostics = validateYaml(content, schemaContent);
-      debug.log("Validation results:", diagnostics);
-      monaco.editor.setModelMarkers(
-        editorRef.current.getModel(),
-        "yaml",
-        diagnostics,
-      );
-    } catch (e) {
-      debug.error("Validation error:", e);
-    }
-  };
-
+const setupSchemaValidation = (editor, schemaContent) => {
   // Update diagnostics on content change
-  editorRef.current.onDidChangeModelContent(() => {
+  editor.onDidChangeModelContent(() => {
     debug.log("Content changed, updating diagnostics...");
-    updateDiagnostics();
+    updateDiagnostics(editor, schemaContent);
   });
 
   // Initial validation
-  updateDiagnostics();
+  updateDiagnostics(editor, schemaContent);
 };
 
 /**
@@ -1088,4 +1096,9 @@ export { schemaDefinitions };
  */
 export { getCompletionItems };
 
-export { setupEditorFeatures, handleSchemaLoadFailure, setupSchemaValidation };
+export {
+  setupEditorFeatures,
+  handleSchemaLoadFailure,
+  setupSchemaValidation,
+  updateDiagnostics,
+};

@@ -1,7 +1,7 @@
-import * as React from "react"
+import * as React from "react";
 import { cva } from "class-variance-authority";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 /**
  * badgeVariants function.
@@ -28,8 +28,8 @@ const badgeVariants = cva(
     defaultVariants: {
       variant: "default",
     },
-  }
-)
+  },
+);
 
 /**
  * Badge component.
@@ -42,12 +42,10 @@ const badgeVariants = cva(
  * @param {String} props.variant - The variant of the badge to be rendered.
  * @returns {React.ReactElement} - The Badge component.
  */
-function Badge({
-  className,
-  variant,
-  ...props
-}) {
-  return (<div className={cn(badgeVariants({ variant }), className)} {...props} />);
+function Badge({ className, variant, ...props }) {
+  return (
+    <div className={cn(badgeVariants({ variant }), className)} {...props} />
+  );
 }
 
-export { Badge, badgeVariants }
+export { Badge, badgeVariants };

@@ -1,4 +1,4 @@
-import { create } from 'zustand'
+import { create } from "zustand";
 
 /**
  * Creates a Zustand store for managing the state of the share dialog.
@@ -17,7 +17,7 @@ const useDialogStore = create((set) => ({
    *
    * @type {string}
    */
-  shareUrl: '',
+  shareUrl: "",
   /**
    * Opens the share dialog with the specified URL.
    *
@@ -28,7 +28,7 @@ const useDialogStore = create((set) => ({
    * Closes the share dialog.
    */
   closeShareDialog: () => set({ isShareDialogOpen: false }),
-}))
+}));
 
 /**
  * Shows the share dialog with the specified URL.
@@ -36,7 +36,7 @@ const useDialogStore = create((set) => ({
  * @param {string} shareUrl - The URL to be shared.
  */
 export const showShareDialog = (shareUrl) => {
-  useDialogStore.getState().openShareDialog(shareUrl)
-}
+  useDialogStore.getState().openShareDialog(shareUrl);
+};
 
-export { useDialogStore }
+export { useDialogStore };

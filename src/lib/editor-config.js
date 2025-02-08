@@ -1,6 +1,6 @@
-import landofileExample from "../templates/example-landofile.yml?raw";
-import { getSharedContent } from "../share";
-import { loadEditorContent } from "./storage";
+import landofileExample from "@/templates/example-landofile.yml?raw";
+import { getSharedContent } from "@/lib/share";
+import { loadEditorContent } from "@/lib/storage";
 
 /**
  * Returns the configuration options for the Monaco editor instance
@@ -8,14 +8,14 @@ import { loadEditorContent } from "./storage";
  */
 const getEditorOptions = () => ({
   value: getDefaultContent(),
-  language: 'yaml',
-  theme: document.documentElement.classList.contains('dark') ? 'lando' : 'vs',
+  language: "yaml",
+  theme: document.documentElement.classList.contains("dark") ? "lando" : "vs",
   automaticLayout: true,
   minimap: { enabled: false },
   scrollBeyondLastLine: false,
   fontSize: 18,
-  lineNumbers: 'on',
-  renderWhitespace: 'selection',
+  lineNumbers: "on",
+  renderWhitespace: "selection",
   tabSize: 2,
   fixedOverflowWidgets: true,
   quickSuggestions: true,
@@ -29,14 +29,14 @@ const getEditorOptions = () => ({
     showSnippets: true,
     showProperties: true,
     localityBonus: true,
-    insertMode: 'insert',
+    insertMode: "insert",
     insertHighlight: true,
-    selectionMode: 'always',
+    selectionMode: "always",
   },
-  acceptSuggestionOnEnter: 'on',
+  acceptSuggestionOnEnter: "on",
   acceptSuggestionOnCommitCharacter: true,
-  snippetSuggestions: 'inline',
-  tabCompletion: 'on',
+  snippetSuggestions: "inline",
+  tabCompletion: "on",
   snippetOptions: { exitOnEnter: true },
 });
 

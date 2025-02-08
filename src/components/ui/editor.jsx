@@ -4,7 +4,10 @@ import { MarkerSeverity } from "monaco-editor/esm/vs/platform/markers/common/mar
 import editorWorker from "monaco-editor/esm/vs/editor/editor.worker?worker";
 import jsonWorker from "monaco-editor/esm/vs/language/json/json.worker?worker";
 import "monaco-editor/esm/vs/basic-languages/yaml/yaml.contribution";
-import { setupEditorFeatures } from "@/lib/schema-validation";
+import {
+  setupEditorFeatures,
+  updateDiagnostics,
+} from "@/lib/schema-validation";
 import { debug } from "@/lib/debug";
 import { formatYaml } from "@/lib/format-yaml";
 import { useToast } from "@/hooks/use-toast";
@@ -108,7 +111,7 @@ export function Editor() {
             containerRef.current,
             getEditorOptions(),
           );
-          await setupEditorFeatures();
+          await setupEditorFeatures(editorRef.current, toast);
           setupEventListeners();
           handleSharedContent();
           setIsEditorReady(true);
@@ -137,7 +140,7 @@ export function Editor() {
         editorRef.current.dispose();
       }
     };
-  }, []);
+  }, [toast]);
 
   /**
    * Effect hook for handling clicks outside the editor menu

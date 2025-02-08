@@ -1,10 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ["class"],
-  content: [
-    "./index.html",
-    "./src/**/*.{ts,tsx,js,jsx}",
-  ],
+  content: ["./index.html", "./src/**/*.{ts,tsx,js,jsx}"],
   theme: {
     extend: {
       colors: {
@@ -43,23 +40,21 @@ module.exports = {
         },
       },
       keyframes: {
-        'toast-in': {
-          '0%': { transform: 'translateY(100%)' },
-          '60%': { transform: 'translateY(-12px)' },
-          '100%': { transform: 'translateY(0)' }
+        "toast-in": {
+          "0%": { transform: "translateY(100%)" },
+          "60%": { transform: "translateY(-12px)" },
+          "100%": { transform: "translateY(0)" },
         },
-        'toast-out': {
-          '0%': { transform: 'translateY(0)' },
-          '100%': { transform: 'translateY(100%)' }
-        }
+        "toast-out": {
+          "0%": { transform: "translateY(0)" },
+          "100%": { transform: "translateY(100%)" },
+        },
       },
       animation: {
-        'toast-in': 'toast-in 0.5s cubic-bezier(0.15, 1.15, 0.4, 1.2) forwards',
-        'toast-out': 'toast-out 0.4s ease-in-out forwards'
-      }
+        "toast-in": "toast-in 0.5s cubic-bezier(0.15, 1.15, 0.4, 1.2) forwards",
+        "toast-out": "toast-out 0.4s ease-in-out forwards",
+      },
     },
   },
-  plugins: [
-    require('@tailwindcss/typography'),
-  ],
-}
+  plugins: [require("@tailwindcss/typography")],
+};
