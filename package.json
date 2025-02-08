@@ -9,9 +9,7 @@
     "build": "vite build",
     "preview": "vite preview"
   },
-  "keywords": [
-    "lando"
-  ],
+  "keywords": ["lando"],
   "author": "Aaron Feledy",
   "license": "GPL-3.0-or-later",
   "dependencies": {

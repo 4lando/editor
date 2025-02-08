@@ -1,6 +1,6 @@
-import { defineConfig } from 'vite';
-import path from 'node:path';
-import react from '@vitejs/plugin-react';
+import { defineConfig } from "vite";
+import path from "node:path";
+import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [react()],
@@ -8,18 +8,18 @@ export default defineConfig({
     open: true,
     fs: {
       // Allow serving files from one level up to the src directory
-      allow: ['..'],
+      allow: [".."],
     },
   },
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src'),
-      'monaco-editor': path.resolve(__dirname, 'node_modules/monaco-editor'),
+      "@": path.resolve(__dirname, "src"),
+      "monaco-editor": path.resolve(__dirname, "node_modules/monaco-editor"),
     },
     preserveSymlinks: true,
   },
   worker: {
-    format: 'es',
+    format: "es",
     plugins: [],
     rollupOptions: {
       output: {
@@ -29,27 +29,27 @@ export default defineConfig({
   },
   optimizeDeps: {
     include: [
-      'monaco-editor/esm/vs/language/json/json.worker',
-      'monaco-editor/esm/vs/editor/editor.worker',
-      'react',
-      'react-dom',
+      "monaco-editor/esm/vs/language/json/json.worker",
+      "monaco-editor/esm/vs/editor/editor.worker",
+      "react",
+      "react-dom",
     ],
-    exclude: ['monaco-editor'],
+    exclude: ["monaco-editor"],
   },
   build: {
-    outDir: 'public',
-    assetsDir: 'assets',
+    outDir: "public",
+    assetsDir: "assets",
     sourcemap: true, // Enable source maps for main bundle
     rollupOptions: {
       output: {
         manualChunks: {
-          monaco: ['monaco-editor'],
-          editor: ['monaco-editor/esm/vs/editor/editor.worker'],
-          json: ['monaco-editor/esm/vs/language/json/json.worker'],
-          vendor: ['react', 'react-dom'],
+          monaco: ["monaco-editor"],
+          editor: ["monaco-editor/esm/vs/editor/editor.worker"],
+          json: ["monaco-editor/esm/vs/language/json/json.worker"],
+          vendor: ["react", "react-dom"],
         },
       },
     },
   },
-  publicDir: 'static',
+  publicDir: "static",
 });

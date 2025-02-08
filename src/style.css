@@ -5,22 +5,24 @@
 }
 
 .dark {
-  --c-bg: #261D2D;
-  --c-bg-lighter: #382A3D;
+  --c-bg: #261d2d;
+  --c-bg-lighter: #382a3d;
 }
 
 /* Apply gradient background */
 body {
-  background: radial-gradient(121.65% 71.43% at 91.1% 13.63%,
-      var(--c-bg-lighter) 0%,
-      var(--c-bg) 100%);
+  background: radial-gradient(
+    121.65% 71.43% at 91.1% 13.63%,
+    var(--c-bg-lighter) 0%,
+    var(--c-bg) 100%
+  );
   min-height: 100vh;
 }
 
 /* Update drag and drop styles to target the main container */
 .monaco-editor-container.drag-over::after,
 .editor-container .monaco-editor-container:has(+ .drag-over)::after {
-  content: 'Drop .lando.yml or .lando.*.yml file here';
+  content: "Drop .lando.yml or .lando.*.yml file here";
   position: absolute;
   top: 0;
   left: 0;
@@ -69,7 +71,8 @@ body {
   padding: 0.75rem 1.5rem;
   background-color: var(--c-bg-lighter);
   border-radius: 0.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px
+    rgba(0, 0, 0, 0.06);
   opacity: 0;
   transition: all 0.4s cubic-bezier(0.15, 1.15, 0.4, 1.2);
   border-color: #df4090;

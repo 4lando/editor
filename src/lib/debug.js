@@ -1,16 +1,16 @@
 class Debug {
   constructor(enabled = false) {
     this.enabled = enabled;
-    this.prefix = '[Landofile Editor]';
+    this.prefix = "[Landofile Editor]";
   }
 
   enable() {
     this.enabled = true;
-    this.log('Debug mode enabled');
+    this.log("Debug mode enabled");
   }
 
   disable() {
-    this.log('Debug mode disabled');
+    this.log("Debug mode disabled");
     this.enabled = false;
   }
 
@@ -39,7 +39,7 @@ class Debug {
   }
 }
 
-export const debug = new Debug(localStorage.getItem('debug') === 'true');
+export const debug = new Debug(localStorage.getItem("debug") === "true");
 
 // Enable debug mode with: localStorage.setItem('debug', 'true')
-// Disable debug mode with: localStorage.setItem('debug', 'false') 
+// Disable debug mode with: localStorage.setItem('debug', 'false')

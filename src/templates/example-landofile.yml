@@ -1,0 +1,16 @@
+name: my-lando-app
+recipe: lamp
+config:
+  php: '8.3'
+  webroot: .
+  database: mysql:8.0
+  xdebug: false
+
+services:
+  node:
+    type: node:20
+    build:
+      - npm install
+    command: vite --host 0.0.0.0
+    port: 5173
+    ssl: true
