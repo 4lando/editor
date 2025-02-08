@@ -1,5 +1,5 @@
 import { defineConfig } from 'vite';
-import path from 'path';
+import path from 'node:path';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
@@ -31,6 +31,8 @@ export default defineConfig({
     include: [
       'monaco-editor/esm/vs/language/json/json.worker',
       'monaco-editor/esm/vs/editor/editor.worker',
+      'react',
+      'react-dom',
     ],
     exclude: ['monaco-editor'],
   },
@@ -44,6 +46,7 @@ export default defineConfig({
           monaco: ['monaco-editor'],
           editor: ['monaco-editor/esm/vs/editor/editor.worker'],
           json: ['monaco-editor/esm/vs/language/json/json.worker'],
+          vendor: ['react', 'react-dom'],
         },
       },
     },
