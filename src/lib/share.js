@@ -28,7 +28,7 @@ const compressionMap = {
 export function generateShareUrl(content) {
   try {
     // Format content before sharing
-    let formatted = formatYaml(content);
+    const formatted = formatYaml(content);
 
     // Parse as YAML to preserve comments
     const doc = parseDocument(formatted, {
@@ -47,9 +47,9 @@ export function generateShareUrl(content) {
 
     // Apply compression map
     let compressed = yamlStr;
-    Object.entries(compressionMap).forEach(([key, value]) => {
+    for (const [key, value] of Object.entries(compressionMap)) {
       compressed = compressed.replaceAll(key, value);
-    });
+    }
 
     // Compress the shortened content
     const encoded = compressToEncodedURIComponent(compressed);
@@ -72,9 +72,9 @@ export function getSharedContent() {
     if (!content) return null;
 
     // Reverse compression map
-    Object.entries(compressionMap).forEach(([key, value]) => {
+    for (const [key, value] of Object.entries(compressionMap)) {
       content = content.replaceAll(value, key);
-    });
+    }
 
     // Parse and re-stringify to ensure proper formatting
     const doc = parseDocument(content, {

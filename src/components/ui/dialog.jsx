@@ -4,14 +4,48 @@ import { X } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Dialog component.
+ *
+ * This component wraps the DialogPrimitive.Root component from @radix-ui/react-dialog.
+ * It is used to create a dialog that can be triggered to open or close.
+ */
 const Dialog = DialogPrimitive.Root
 
+/**
+ * DialogTrigger component.
+ *
+ * This component wraps the DialogPrimitive.Trigger component from @radix-ui/react-dialog.
+ * It is used to trigger the opening of the Dialog.
+ */
 const DialogTrigger = DialogPrimitive.Trigger
 
+/**
+ * DialogPortal component.
+ *
+ * This component wraps the DialogPrimitive.Portal component from @radix-ui/react-dialog.
+ * It is used to portal the DialogContent to the end of the document.
+ */
 const DialogPortal = DialogPrimitive.Portal
 
+/**
+ * DialogClose component.
+ *
+ * This component wraps the DialogPrimitive.Close component from @radix-ui/react-dialog.
+ * It is used to close the Dialog.
+ */
 const DialogClose = DialogPrimitive.Close
 
+/**
+ * DialogOverlay component.
+ *
+ * This component wraps the DialogPrimitive.Overlay component from @radix-ui/react-dialog.
+ * It is used to create the overlay that covers the background when the Dialog is open.
+ *
+ * @param {Object} props - The props passed to the component.
+ * @param {React.RefObject} ref - The ref object passed to the component.
+ * @returns The DialogOverlay component.
+ */
 const DialogOverlay = React.forwardRef(({ className, ...props }, ref) => (
   <DialogPrimitive.Overlay
     ref={ref}
@@ -23,6 +57,16 @@ const DialogOverlay = React.forwardRef(({ className, ...props }, ref) => (
 ))
 DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 
+/**
+ * DialogContent component.
+ *
+ * This component wraps the DialogPrimitive.Content component from @radix-ui/react-dialog.
+ * It is used to create the content of the Dialog.
+ *
+ * @param {Object} props - The props passed to the component.
+ * @param {React.RefObject} ref - The ref object passed to the component.
+ * @returns The DialogContent component.
+ */
 const DialogContent = React.forwardRef(({ className, children, ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay />
@@ -44,6 +88,14 @@ const DialogContent = React.forwardRef(({ className, children, ...props }, ref) 
 ))
 DialogContent.displayName = DialogPrimitive.Content.displayName
 
+/**
+ * DialogHeader component.
+ *
+ * This component is used to create the header of the Dialog.
+ *
+ * @param {Object} props - The props passed to the component.
+ * @returns The DialogHeader component.
+ */
 const DialogHeader = ({
   className,
   ...props
@@ -57,6 +109,14 @@ const DialogHeader = ({
 )
 DialogHeader.displayName = "DialogHeader"
 
+/**
+ * DialogFooter component.
+ *
+ * This component is used to create the footer of the Dialog.
+ *
+ * @param {Object} props - The props passed to the component.
+ * @returns The DialogFooter component.
+ */
 const DialogFooter = ({
   className,
   ...props
@@ -70,6 +130,16 @@ const DialogFooter = ({
 )
 DialogFooter.displayName = "DialogFooter"
 
+/**
+ * DialogTitle component.
+ *
+ * This component wraps the DialogPrimitive.Title component from @radix-ui/react-dialog.
+ * It is used to create the title of the Dialog.
+ *
+ * @param {Object} props - The props passed to the component.
+ * @param {React.RefObject} ref - The ref object passed to the component.
+ * @returns The DialogTitle component.
+ */
 const DialogTitle = React.forwardRef(({ className, ...props }, ref) => (
   <DialogPrimitive.Title
     ref={ref}
@@ -81,6 +151,16 @@ const DialogTitle = React.forwardRef(({ className, ...props }, ref) => (
 ))
 DialogTitle.displayName = DialogPrimitive.Title.displayName
 
+/**
+ * DialogDescription component.
+ *
+ * This component wraps the DialogPrimitive.Description component from @radix-ui/react-dialog.
+ * It is used to create the description of the Dialog.
+ *
+ * @param {Object} props - The props passed to the component.
+ * @param {React.RefObject} ref - The ref object passed to the component.
+ * @returns The DialogDescription component.
+ */
 const DialogDescription = React.forwardRef(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}

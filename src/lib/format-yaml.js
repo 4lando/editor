@@ -1,12 +1,12 @@
 import * as monaco from 'monaco-editor';
-import { parse, stringify, parseDocument } from 'yaml';
-import { debug } from '../debug';
+import { parseDocument } from 'yaml';
+import { debug } from "./debug";
 
 export function formatYaml(content) {
   try {
     // First normalize line endings
     const normalizedContent = content
-      .replace(/\r\n/g, '\n')
+      .replace(/\r\n/g, "\n")
       // Replace lines with only whitespace with empty lines
       .replace(/^\s+$/gm, '');
 
@@ -35,10 +35,10 @@ export function formatYaml(content) {
 
     // Clean up multiple empty lines while preserving single ones
     return formatted
-      .replace(/\n{3,}/g, '\n\n')
-      + (formatted.endsWith('\n') ? '' : '\n');
+      .replace(/\n{3,}/g, "\n\n") +
+      (formatted.endsWith("\n") ? "" : "\n");
   } catch (error) {
-    debug.error('Failed to format YAML:', error);
+    debug.error("Failed to format YAML:", error);
     throw error;
   }
 }
@@ -54,10 +54,10 @@ function formatNode(node) {
     return lines.map((line, i) => {
       // If this is a comment before a node, use the node's indentation
       // If it's after a node, keep its current indentation
-      if (isBeforeNode && line.startsWith('#')) {
+      if (isBeforeNode && line.startsWith("#")) {
         // Find the first non-empty line after this comment
         const nextContent = node.value || node;
-        const indent = nextContent?.type === 'MAP' ? '  ' : '';
+        const indent = nextContent?.type === "MAP" ? "  " : "";
         return indent + line.trim();
       }
       return line;
@@ -70,21 +70,21 @@ function formatNode(node) {
 
   // Format collection items
   if (node.items) {
-    node.items.forEach(item => {
+    for (const item of node.items) {
       if (item.comment) item.comment = getCommentIndent(item.comment.trimEnd(), false);
       if (item.commentBefore) item.commentBefore = getCommentIndent(item.commentBefore.trimEnd(), true);
       if (item.value) formatNode(item.value);
-    });
+    }
   }
 
   // Format key/value pairs
   if (node.pairs) {
-    node.pairs.forEach(pair => {
+    for (const pair of node.pairs) {
       if (pair.comment) pair.comment = getCommentIndent(pair.comment.trimEnd(), false);
       if (pair.commentBefore) pair.commentBefore = getCommentIndent(pair.commentBefore.trimEnd(), true);
       if (pair.key) formatNode(pair.key);
       if (pair.value) formatNode(pair.value);
-    });
+    }
   }
 }
 
@@ -119,8 +119,8 @@ export function formatDocument(editor, toast) {
   } catch (error) {
     debug.error('Format failed:', error);
     const errorMatch = error.message.match(/at line (\d+), column (\d+)/i);
-    const startLine = errorMatch ? parseInt(errorMatch[1]) : 1;
-    const startCol = errorMatch ? parseInt(errorMatch[2]) : 1;
+    const startLine = errorMatch ? Number.parseInt(errorMatch[1]) : 1;
+    const startCol = errorMatch ? Number.parseInt(errorMatch[2]) : 1;
 
     toast({
       description: `Failed to format: ${error.message}`,

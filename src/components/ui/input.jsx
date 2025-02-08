@@ -1,7 +1,18 @@
 import * as React from "react"
-
 import { cn } from "@/lib/utils"
 
+/**
+ * Input component.
+ *
+ * This component renders an input field with a default set of styles.
+ * It uses the cn utility function from @/lib/utils to concatenate the base and variant class names.
+ *
+ * @param {Object} props - The props passed to the component.
+ * @param {String} props.className - Additional class names to be applied to the component.
+ * @param {String} props.type - The type of the input field.
+ * @param {React.RefObject} ref - The ref object passed to the component.
+ * @returns {React.ReactElement} - The Input component.
+ */
 const Input = React.forwardRef(({ className, type, ...props }, ref) => {
   return (
     (<input

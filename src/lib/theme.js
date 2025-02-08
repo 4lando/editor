@@ -1,7 +1,29 @@
 import * as monaco from 'monaco-editor';
 import { debug } from '../debug';
 
-// Define Lando theme colors
+/**
+ * @typedef {Object} ThemeRule
+ * @property {string} token - The token to apply the rule to.
+ * @property {string} foreground - The foreground color for the token.
+ * @property {string} fontStyle - The font style for the token.
+ */
+
+/**
+ * @typedef {Object} Theme
+ * @property {string} base - The base theme to inherit from.
+ * @property {boolean} inherit - Whether to inherit from the base theme.
+ * @property {ThemeRule[]} rules - The rules to apply to the theme.
+ * @property {Object} colors - The colors to apply to the theme.
+ */
+
+/**
+ * Define Lando theme colors
+ * @type {Theme}
+ * @property {string} base - The base theme to inherit from.
+ * @property {boolean} inherit - Whether to inherit from the base theme.
+ * @property {ThemeRule[]} rules - The rules to apply to the theme.
+ * @property {ThemeColors} colors - The colors to apply to the theme.
+ */
 const landoTheme = {
   base: 'vs-dark',
   inherit: true,
@@ -45,6 +67,11 @@ const landoTheme = {
   },
 };
 
+/**
+ * Initializes the Lando theme.
+ * This function registers the Lando theme with Monaco Editor and sets the initial theme based on the current dark mode state.
+ * It also listens for theme changes and updates the Monaco Editor theme accordingly.
+ */
 export function initTheme() {
   debug.log('Registering Lando theme...');
   monaco.editor.defineTheme('lando', landoTheme);
@@ -60,10 +87,10 @@ export function initTheme() {
 
     // Update Monaco Editor theme
     const editors = monaco.editor.getEditors();
-    editors.forEach(editor => {
+    for (const editor of editors) {
       editor.updateOptions({
         theme: isDark ? 'lando' : 'vs',
       });
-    });
+    }
   });
 }
