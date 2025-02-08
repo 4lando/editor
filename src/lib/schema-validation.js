@@ -1,11 +1,11 @@
-import * as YAML from "yaml";
-import Ajv from "ajv";
-import { TokenizationRegistry } from "monaco-editor/esm/vs/editor/common/languages";
 import { registerCompletionProvider } from "@/lib/completions";
-import { setupYamlFormatting } from "@/lib/format-yaml";
-import { debug } from "@/lib/debug";
 import { MarkerSeverity } from "@/lib/constants";
+import { debug } from "@/lib/debug";
+import { setupYamlFormatting } from "@/lib/format-yaml";
+import Ajv from "ajv";
 import * as monaco from "monaco-editor";
+import { TokenizationRegistry } from "monaco-editor/esm/vs/editor/common/languages";
+import * as YAML from "yaml";
 
 /**
  * Ajv instance configured for schema validation

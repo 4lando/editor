@@ -1,6 +1,6 @@
-import landofileExample from "@/templates/example-landofile.yml?raw";
 import { getSharedContent } from "@/lib/share";
 import { loadEditorContent } from "@/lib/storage";
+import landofileExample from "@/templates/example-landofile.yml?raw";
 
 /**
  * Returns the configuration options for the Monaco editor instance
