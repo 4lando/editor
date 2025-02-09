@@ -41,7 +41,7 @@ const getEditorOptions = () => ({
   scrollbar: {
     verticalScrollbarSize: 6,
     horizontalScrollbarSize: 6,
-	},
+  },
 });
 
 /**
