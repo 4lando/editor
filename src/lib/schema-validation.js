@@ -1,12 +1,12 @@
 import { registerCompletionProvider } from "@/lib/completions";
 import { MarkerSeverity } from "@/lib/constants";
+import { SeveritySymbols } from "@/lib/constants";
 import { debug } from "@/lib/debug";
 import { setupYamlFormatting } from "@/lib/format-yaml";
 import Ajv from "ajv";
 import * as monaco from "monaco-editor";
 import { TokenizationRegistry } from "monaco-editor/esm/vs/editor/common/languages";
 import * as YAML from "yaml";
-import { SeveritySymbols } from "@/lib/constants";
 
 /**
  * Ajv instance configured for schema validation
@@ -425,16 +425,16 @@ export function getHoverInfo(content, position) {
         if (info.default !== undefined) {
           contents.push({ value: "Default:" });
           contents.push({
-            value: `\`\`\`yaml\n${formatExample(key, info.default)}\`\`\``,
+            value: `\`\`\`yaml\n${formatExample(key, info.default)}\n\`\`\``,
           });
         }
 
         // Examples
         if (info.examples?.length) {
-          contents.push({ value: "\nExamples:" });
+          contents.push({ value: "---\nExamples:" });
           for (const example of info.examples) {
             contents.push({
-              value: `\`\`\`yaml\n${formatExample(key, example)}\`\`\``,
+              value: `\`\`\`yaml\n${formatExample(key, example)}\n\`\`\``,
             });
           }
         }
@@ -1192,7 +1192,9 @@ function getSchemaAtPath(schema, path) {
 
     // Check pattern properties
     if (current.patternProperties) {
-      const patternMatch = Object.entries(current.patternProperties).find(([pattern]) => new RegExp(pattern).test(segment));
+      const patternMatch = Object.entries(current.patternProperties).find(([pattern]) =>
+        new RegExp(pattern).test(segment),
+      );
       if (patternMatch) {
         current = patternMatch[1];
         continue;

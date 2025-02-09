@@ -8,11 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { debug } from "@/lib/debug";
 import { getEditorOptions } from "@/lib/editor-config";
 import { formatYaml } from "@/lib/format-yaml";
-import {
-  setupEditorFeatures,
-  updateDiagnostics,
-  compiledSchema,
-} from "@/lib/schema-validation";
+import { compiledSchema, setupEditorFeatures, updateDiagnostics } from "@/lib/schema-validation";
 import { getSharedContent } from "@/lib/share";
 import { saveEditorContent } from "@/lib/storage";
 import { EditorMenu } from "./editor-menu";
@@ -108,10 +104,7 @@ export function Editor() {
           }
 
           setupMonacoWorkers();
-          editorRef.current = monaco.editor.create(
-            containerRef.current,
-            getEditorOptions(),
-          );
+          editorRef.current = monaco.editor.create(containerRef.current, getEditorOptions());
           await setupEditorFeatures(editorRef.current, toast);
           setupEventListeners();
           handleSharedContent();
@@ -149,11 +142,7 @@ export function Editor() {
    */
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (
-        isMenuOpen &&
-        !e.target.closest(".editor-drawer") &&
-        !e.target.closest("#editor-menu-button")
-      ) {
+      if (isMenuOpen && !e.target.closest(".editor-drawer") && !e.target.closest("#editor-menu-button")) {
         setIsMenuOpen(false);
       }
     };
@@ -184,8 +173,7 @@ export function Editor() {
         toast({
           description: "Failed to load shared content",
           duration: 5000,
-          className:
-            "bg-red-50 dark:bg-red-900/10 text-red-800 dark:text-red-200",
+          className: "bg-red-50 dark:bg-red-900/10 text-red-800 dark:text-red-200",
         });
       }
     }
@@ -223,8 +211,7 @@ export function Editor() {
         toast({
           description: `Failed to format: ${error.message}`,
           duration: 5000,
-          className:
-            "bg-red-50 dark:bg-red-900/10 text-red-800 dark:text-red-200",
+          className: "bg-red-50 dark:bg-red-900/10 text-red-800 dark:text-red-200",
         });
       }
     });
@@ -290,8 +277,7 @@ export function Editor() {
           toast({
             description: `Error reading file: ${error.message}`,
             duration: 5000,
-            className:
-              "bg-red-50 dark:bg-red-900/10 text-red-800 dark:text-red-200",
+            className: "bg-red-50 dark:bg-red-900/10 text-red-800 dark:text-red-200",
           });
           monaco.editor.setModelMarkers(editorRef.current.getModel(), "yaml", [
             {
@@ -351,12 +337,7 @@ export function Editor() {
         </svg>
       </button>
       {editorRef.current && (
-        <EditorMenu
-          editor={editorRef.current}
-          toast={toast}
-          isOpen={isMenuOpen}
-          onToggle={setIsMenuOpen}
-        />
+        <EditorMenu editor={editorRef.current} toast={toast} isOpen={isMenuOpen} onToggle={setIsMenuOpen} />
       )}
     </div>
   );

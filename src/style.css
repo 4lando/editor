@@ -104,31 +104,6 @@ body {
   @apply shadow-lg;
 }
 
-/* Custom scrollbar for instructions panel */
-.instructions-panel {
-  scrollbar-width: thin;
-  scrollbar-color: #df4090 transparent;
-}
-
-.instructions-panel::-webkit-scrollbar {
-  width: 8px;
-}
-
-.instructions-panel::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.instructions-panel::-webkit-scrollbar-thumb {
-  background-color: #df4090;
-  border-radius: 20px;
-  border: 2px solid transparent;
-  background-clip: content-box;
-}
-
-.dark .instructions-panel::-webkit-scrollbar-thumb {
-  background-color: #df4090;
-}
-
 /* Add fade-out animation */
 .fade-out {
   opacity: 0;

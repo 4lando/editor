@@ -1,9 +1,11 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
-import { initTheme } from "./lib/theme";
+import { initTheme } from "./lib/editor-theme.js";
 import "./index.css";
 import "./style.css";
+import { InfoPanel } from "./components/ui/info-panel";
+import { usageInstructions } from "./content/usage-instructions.jsx";
 
 // Initialize theme before rendering
 initTheme();
@@ -11,7 +13,9 @@ initTheme();
 function initApp() {
   // Find the editor container in the existing HTML
   const editorContainer = document.querySelector(".editor-wrapper");
-  if (editorContainer) {
+  const infoPanel = document.querySelector("#info-panel");
+
+  if (editorContainer && infoPanel) {
     // Keep the loader, just remove other content if any
     const loader = editorContainer.querySelector("#editor-loader");
     // Create a new container for the React app that sits behind the loader
@@ -31,6 +35,13 @@ function initApp() {
     if (loader) {
       editorContainer.appendChild(loader);
     }
+
+    // Mount InfoPanel component
+    ReactDOM.createRoot(infoPanel).render(
+      <React.StrictMode>
+        <InfoPanel title="Usage Instructions" content={usageInstructions} />
+      </React.StrictMode>,
+    );
   }
 }
 

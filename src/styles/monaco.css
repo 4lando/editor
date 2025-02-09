@@ -1,7 +1,9 @@
 /* Monaco Editor container styles */
 .monaco-editor {
   outline: none;
+  z-index: 1;
 }
+
 .monaco-editor .overflow-guard {
   margin-top: 0.5rem;
 }
@@ -13,17 +15,7 @@
   height: 100% !important;
 }
 
-/* Make sure Monaco editor has proper z-index */
-.monaco-editor {
-  z-index: 1;
-}
-
-/* Remove blue border from scrollbar */
-.monaco-editor .decorationsOverviewRuler {
-  display: none;
-}
-
-/* Style Monaco hover widget */
+/* Monaco hover widget */
 .monaco-editor .monaco-hover {
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -37,4 +29,21 @@
 .monaco-editor .monaco-hover .hover-row:last-child {
   border-bottom-left-radius: 8px;
   border-bottom-right-radius: 8px;
+}
+
+.monaco-editor .monaco-hover .code-hover-contents {
+  margin-top: 2px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.monaco-editor .monaco-hover .code-hover-contents .rendered-markdown .monaco-tokenized-source {
+  background-color: var(--c-bg);
+  padding: 0.2rem;
+  padding-left: 0.5rem;
+}
+
+/* Scrollbar */
+.monaco-scrollable-element > .scrollbar > .slider {
+  border-radius: 9999px;
 }

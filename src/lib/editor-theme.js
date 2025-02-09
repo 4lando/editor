@@ -64,6 +64,9 @@ const landoTheme = {
     "editorHoverWidget.border": "#de3f8f",
     "editorHoverWidget.foreground": "#f8f8f2",
     "editorHoverWidget.statusBarBackground": "#382A3D",
+    "scrollbarSlider.background": "#de3f8f66",
+    "scrollbarSlider.hoverBackground": "#de3f8fcc",
+    "scrollbarSlider.activeBackground": "#de3f8fff",
   },
 };
 
