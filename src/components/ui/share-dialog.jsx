@@ -1,10 +1,4 @@
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import React from "react";
 
 export function ShareDialog({ isOpen, onClose, shareUrl }) {
@@ -13,9 +7,7 @@ export function ShareDialog({ isOpen, onClose, shareUrl }) {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Share Landofile</DialogTitle>
-          <DialogDescription>
-            Copy this URL to share your Landofile configuration:
-          </DialogDescription>
+          <DialogDescription>Copy this URL to share your Landofile configuration:</DialogDescription>
         </DialogHeader>
         <div className="flex items-center space-x-2">
           <input

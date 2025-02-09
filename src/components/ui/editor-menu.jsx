@@ -23,8 +23,7 @@ export function EditorMenu({ editor, toast, isOpen, onToggle }) {
       toast({
         description: "Failed to generate share URL",
         duration: 5000,
-        className:
-          "bg-red-50 dark:bg-red-900/10 text-red-800 dark:text-red-200",
+        className: "bg-red-50 dark:bg-red-900/10 text-red-800 dark:text-red-200",
       });
     }
   };
@@ -43,8 +42,7 @@ export function EditorMenu({ editor, toast, isOpen, onToggle }) {
     onToggle(false);
 
     toast({
-      description:
-        'Remember to remove the underscore from "_.lando.yml" after downloading',
+      description: 'Remember to remove the underscore from "_.lando.yml" after downloading',
       duration: 5000,
     });
   };
@@ -58,8 +56,7 @@ export function EditorMenu({ editor, toast, isOpen, onToggle }) {
       toast({
         description: "Only .lando.yml and .lando.*.yml files are supported",
         duration: 5000,
-        className:
-          "bg-red-50 dark:bg-red-900/10 text-red-800 dark:text-red-200",
+        className: "bg-red-50 dark:bg-red-900/10 text-red-800 dark:text-red-200",
       });
       return;
     }
@@ -121,12 +118,7 @@ export function EditorMenu({ editor, toast, isOpen, onToggle }) {
               />
             </svg>
             Open
-            <input
-              type="file"
-              accept=".yml,.yaml"
-              className="hidden"
-              onChange={handleFileSelect}
-            />
+            <input type="file" accept=".yml,.yaml" className="hidden" onChange={handleFileSelect} />
           </label>
           <button
             type="button"
@@ -167,12 +159,7 @@ export function EditorMenu({ editor, toast, isOpen, onToggle }) {
               aria-labelledby="title"
             >
               <title id="title">Format document</title>
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 6h16M4 12h16M4 18h7"
-              />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h7" />
             </svg>
             Format
           </button>

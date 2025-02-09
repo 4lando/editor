@@ -151,9 +151,7 @@ export const reducer = (state: State, action: Action): State => {
     case "UPDATE_TOAST":
       return {
         ...state,
-        toasts: state.toasts.map((t) =>
-          t.id === action.toast.id ? { ...t, ...action.toast } : t,
-        ),
+        toasts: state.toasts.map((t) => (t.id === action.toast.id ? { ...t, ...action.toast } : t)),
       };
 
     case "DISMISS_TOAST": {
@@ -244,8 +242,7 @@ function toast({ ...props }: Toast) {
     const lastToast = document.querySelector('[data-state="open"]');
     if (lastToast) {
       const peekToast = document.createElement("div");
-      peekToast.className =
-        "toast-peek border border-pink-500 bg-[var(--c-bg-lighter)] p-6 rounded-md shadow-lg";
+      peekToast.className = "toast-peek border border-pink-500 bg-[var(--c-bg-lighter)] p-6 rounded-md shadow-lg";
 
       const content = document.createElement("div");
       content.className = "grid gap-2";

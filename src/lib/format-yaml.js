@@ -40,10 +40,7 @@ export function formatYaml(content) {
     });
 
     // Clean up multiple empty lines while preserving single ones
-    return (
-      formatted.replace(/\n{3,}/g, "\n\n") +
-      (formatted.endsWith("\n") ? "" : "\n")
-    );
+    return formatted.replace(/\n{3,}/g, "\n\n") + (formatted.endsWith("\n") ? "" : "\n");
   } catch (error) {
     debug.error("Failed to format YAML:", error);
     throw error;
@@ -77,21 +74,14 @@ function formatNode(node) {
   };
 
   // Preserve comments with correct indentation
-  if (node.comment)
-    node.comment = getCommentIndent(node.comment.trimEnd(), false);
-  if (node.commentBefore)
-    node.commentBefore = getCommentIndent(node.commentBefore.trimEnd(), true);
+  if (node.comment) node.comment = getCommentIndent(node.comment.trimEnd(), false);
+  if (node.commentBefore) node.commentBefore = getCommentIndent(node.commentBefore.trimEnd(), true);
 
   // Format collection items
   if (node.items) {
     for (const item of node.items) {
-      if (item.comment)
-        item.comment = getCommentIndent(item.comment.trimEnd(), false);
-      if (item.commentBefore)
-        item.commentBefore = getCommentIndent(
-          item.commentBefore.trimEnd(),
-          true,
-        );
+      if (item.comment) item.comment = getCommentIndent(item.comment.trimEnd(), false);
+      if (item.commentBefore) item.commentBefore = getCommentIndent(item.commentBefore.trimEnd(), true);
       if (item.value) formatNode(item.value);
     }
   }
@@ -99,13 +89,8 @@ function formatNode(node) {
   // Format key/value pairs
   if (node.pairs) {
     for (const pair of node.pairs) {
-      if (pair.comment)
-        pair.comment = getCommentIndent(pair.comment.trimEnd(), false);
-      if (pair.commentBefore)
-        pair.commentBefore = getCommentIndent(
-          pair.commentBefore.trimEnd(),
-          true,
-        );
+      if (pair.comment) pair.comment = getCommentIndent(pair.comment.trimEnd(), false);
+      if (pair.commentBefore) pair.commentBefore = getCommentIndent(pair.commentBefore.trimEnd(), true);
       if (pair.key) formatNode(pair.key);
       if (pair.value) formatNode(pair.value);
     }
@@ -122,9 +107,7 @@ export function setupYamlFormatting(editor, toast) {
   editor.addAction({
     id: "format-yaml",
     label: "Format Document",
-    keybindings: [
-      monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyF,
-    ],
+    keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyF],
     contextMenuGroupId: "1_modification",
     contextMenuOrder: 1.5,
     run: () => formatDocument(editor, toast),

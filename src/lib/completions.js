@@ -65,8 +65,7 @@ function getRootCompletions(schema, range) {
       isTrusted: true,
     },
     insertText: createInsertText(key, prop),
-    insertTextRules:
-      monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+    insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
     range: range,
     sortText: key,
     preselect: true,
@@ -127,8 +126,7 @@ function getCompletionsForSchema(schema, range) {
             isTrusted: true,
           },
           insertText: createInsertText(key, prop),
-          insertTextRules:
-            monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+          insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
           range: range,
           sortText: `3${key}`,
           preselect: true,
@@ -149,8 +147,7 @@ function getCompletionsForSchema(schema, range) {
                 isTrusted: true,
               },
               insertText: createInsertText(String(example), prop),
-              insertTextRules:
-                monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+              insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
               range: range,
               sortText: `4${String(example)}`,
               preselect: true,
@@ -206,9 +203,7 @@ function formatPropertyDocs(prop) {
   }
 
   if (prop.examples?.length) {
-    parts.push(
-      `**Examples:**\n\`\`\`yaml\n${prop.examples.map((ex) => JSON.stringify(ex)).join("\n")}\n\`\`\``,
-    );
+    parts.push(`**Examples:**\n\`\`\`yaml\n${prop.examples.map((ex) => JSON.stringify(ex)).join("\n")}\n\`\`\``);
   }
 
   return parts.join("\n\n");
@@ -249,8 +244,8 @@ function getSchemaAtPath(schema, path) {
 
     // Check pattern properties
     if (current.patternProperties) {
-      const patternMatch = Object.entries(current.patternProperties).find(
-        ([pattern]) => new RegExp(pattern).test(segment),
+      const patternMatch = Object.entries(current.patternProperties).find(([pattern]) =>
+        new RegExp(pattern).test(segment),
       );
       if (patternMatch) {
         current = patternMatch[1];
