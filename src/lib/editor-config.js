@@ -38,6 +38,10 @@ const getEditorOptions = () => ({
   snippetSuggestions: "inline",
   tabCompletion: "on",
   snippetOptions: { exitOnEnter: true },
+  scrollbar: {
+    verticalScrollbarSize: 6,
+    horizontalScrollbarSize: 6,
+  },
 });
 
 /**

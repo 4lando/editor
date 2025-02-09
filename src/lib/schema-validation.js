@@ -1,5 +1,6 @@
 import { registerCompletionProvider } from "@/lib/completions";
 import { MarkerSeverity } from "@/lib/constants";
+import { SeveritySymbols } from "@/lib/constants";
 import { debug } from "@/lib/debug";
 import { setupYamlFormatting } from "@/lib/format-yaml";
 import Ajv from "ajv";
@@ -21,7 +22,7 @@ const ajv = new Ajv({
 let schemaDefinitions = null;
 
 /** @type {Object|null} Compiled JSON schema */
-let compiledSchema = null;
+export let compiledSchema = null;
 
 // Try to import local schema, but don't fail if it doesn't exist
 let localSchema = null;
@@ -64,8 +65,7 @@ export async function loadSchema() {
     }
 
     if (!schema) {
-      const schemaUrl =
-        "https://4lando.github.io/lando-spec/landofile-spec.json";
+      const schemaUrl = "https://4lando.github.io/lando-spec/landofile-spec.json";
       debug.log("Fetching schema from:", schemaUrl);
 
       const response = await fetch(schemaUrl);
@@ -123,13 +123,7 @@ export async function loadSchema() {
  * @param {Object} [rootSchema=null] - Root schema object for resolving refs
  * @returns {Object} Flattened schema with paths as keys
  */
-function flattenSchema(
-  schema,
-  prefix = "",
-  result = {},
-  visited = new Set(),
-  rootSchema = null,
-) {
+function flattenSchema(schema, prefix = "", result = {}, visited = new Set(), rootSchema = null) {
   if (!schema || visited.has(schema)) {
     return result;
   }
@@ -137,10 +131,7 @@ function flattenSchema(
 
   // Store root schema on first call
   const effectiveRootSchema = rootSchema || schema;
-  debug.log(
-    "Root schema initialized with keys:",
-    Object.keys(effectiveRootSchema),
-  );
+  debug.log("Root schema initialized with keys:", Object.keys(effectiveRootSchema));
 
   // Handle $ref resolution first
   if (schema.$ref) {
@@ -193,8 +184,7 @@ function flattenSchema(
           type: refSchema.type || value.type || "",
           pattern,
           oneOf: refSchema.oneOf || value.oneOf || [],
-          additionalProperties:
-            refSchema.additionalProperties || value.additionalProperties,
+          additionalProperties: refSchema.additionalProperties || value.additionalProperties,
         };
       } else {
         // Handle non-ref pattern properties
@@ -233,7 +223,9 @@ function flattenSchema(
         examples: value.examples || [],
         default: value.default,
         oneOf: value.oneOf || [],
+        anyOf: value.anyOf || [],
         additionalProperties: value.additionalProperties,
+        deprecated: value.deprecated,
       };
 
       // Continue flattening nested schemas
@@ -249,7 +241,9 @@ function flattenSchema(
       examples: schema.examples || [],
       default: schema.default,
       oneOf: schema.oneOf || [],
+      anyOf: schema.anyOf || [],
       additionalProperties: schema.additionalProperties,
+      deprecated: schema.deprecated,
     };
   }
 
@@ -260,6 +254,45 @@ function flattenSchema(
       const defsPath = `$defs/${key}`;
       debug.log("Processing $def:", defsPath);
       flattenSchema(value, defsPath, result, visited, effectiveRootSchema);
+    }
+  }
+
+  // Process oneOf/anyOf variants
+  const variants = schema.oneOf || schema.anyOf;
+  if (variants?.length) {
+    for (const [index, variant] of variants.entries()) {
+      const variantPath = `${prefix}#${index}`;
+
+      // Create base schema info for the variant
+      const variantInfo = {
+        description: variant.description || "",
+        type: variant.type || "",
+        pattern: variant.pattern || "",
+        const: variant.const,
+        deprecated: variant.deprecated,
+      };
+
+      // If this is a path that already exists in our results
+      if (result[prefix]) {
+        // Combine the descriptions if both exist
+        const baseDescription = result[prefix].description || "";
+        const variantDescription = variant.description || "";
+
+        if (baseDescription && variantDescription) {
+          // Store both descriptions separately and combined
+          result[prefix].baseDescription = baseDescription;
+          result[prefix].variantDescriptions = result[prefix].variantDescriptions || [];
+          result[prefix].variantDescriptions.push({
+            description: variantDescription,
+            deprecated: variant.deprecated,
+            const: variant.const,
+            pattern: variant.pattern,
+          });
+        }
+      }
+
+      result[variantPath] = variantInfo;
+      flattenSchema(variant, variantPath, result, visited, effectiveRootSchema);
     }
   }
 
@@ -292,9 +325,7 @@ function formatExample(key, example) {
  * Gets hover information for a position in the YAML content
  * @param {string} content - The YAML content
  * @param {Object} position - Position object with lineNumber and column
- * @param {number} position.lineNumber - Line number in the document (1-based)
- * @param {number} position.column - Column in the line (1-based)
- * @returns {Object|null} Hover information with contents and range, or null if none found
+ * @returns {Object|null} Hover information with contents and range
  */
 export function getHoverInfo(content, position) {
   try {
@@ -328,9 +359,51 @@ export function getHoverInfo(content, position) {
       if (info) {
         const contents = [];
 
-        // Description
+        // Get the actual value at this position
+        const value = getValueAtPosition(content, position);
+
+        // Add property deprecation warning if property is deprecated
+        if (info.deprecated) {
+          const symbol = SeveritySymbols[MarkerSeverity.Warning];
+          contents.push({
+            value: `${symbol} **Deprecated:** ${
+              typeof info.deprecated === "string"
+                ? info.deprecated
+                : "This property is deprecated and may be removed in a future version."
+            }`,
+          });
+          contents.push({ value: "---" }); // Add separator
+        }
+
+        // Base description
         if (info.description) {
           contents.push({ value: info.description });
+        }
+
+        // Add variant descriptions if they exist and match the current value
+        if (info.variantDescriptions?.length) {
+          for (const variant of info.variantDescriptions) {
+            if (matchesSchema(value, variant)) {
+              // Add separator if we had a base description
+              if (info.description) {
+                contents.push({ value: "---" });
+              }
+              contents.push({ value: variant.description });
+
+              // Add deprecation warning if this variant is deprecated
+              if (variant.deprecated) {
+                const symbol = SeveritySymbols[MarkerSeverity.Warning];
+                contents.push({
+                  value: `${symbol} **Deprecated:** ${
+                    typeof variant.deprecated === "string"
+                      ? variant.deprecated
+                      : "This value format is deprecated and may be removed in a future version."
+                  }`,
+                });
+              }
+              break;
+            }
+          }
         }
 
         // Type information
@@ -352,16 +425,16 @@ export function getHoverInfo(content, position) {
         if (info.default !== undefined) {
           contents.push({ value: "Default:" });
           contents.push({
-            value: `\`\`\`yaml\n${formatExample(key, info.default)}\`\`\``,
+            value: `\`\`\`yaml\n${formatExample(key, info.default)}\n\`\`\``,
           });
         }
 
         // Examples
         if (info.examples?.length) {
-          contents.push({ value: "\nExamples:" });
+          contents.push({ value: "---\nExamples:" });
           for (const example of info.examples) {
             contents.push({
-              value: `\`\`\`yaml\n${formatExample(key, example)}\`\`\``,
+              value: `\`\`\`yaml\n${formatExample(key, example)}\n\`\`\``,
             });
           }
         }
@@ -394,6 +467,71 @@ export function getHoverInfo(content, position) {
 }
 
 /**
+ * Gets the value at a specific position in the YAML content
+ * @param {string} content - YAML content
+ * @param {Object} position - Position object
+ * @returns {string|null} Value at position or null
+ */
+function getValueAtPosition(content, position) {
+  const lines = content.split("\n");
+  const line = lines[position.lineNumber - 1];
+  const match = line.match(/^(\s*\w+):\s*(.+?)\s*$/);
+  if (match) {
+    return match[2];
+  }
+  return null;
+}
+
+/**
+ * Checks if a value matches a schema
+ * @param {any} value - Value to check
+ * @param {Object} schema - Schema to check against
+ * @returns {boolean} True if value matches schema
+ */
+function matchesSchema(value, schema) {
+  try {
+    // Check const value first
+    if (schema.const !== undefined) {
+      return value === schema.const;
+    }
+
+    // Check pattern
+    if (schema.pattern) {
+      return typeof value === "string" && new RegExp(schema.pattern).test(value);
+    }
+
+    // Simple type checking
+    if (schema.type) {
+      switch (schema.type) {
+        case "string":
+          return typeof value === "string";
+        case "number":
+          return typeof value === "number";
+        case "boolean":
+          return typeof value === "boolean";
+        case "object":
+          return typeof value === "object" && value !== null;
+        case "array":
+          return Array.isArray(value);
+        default:
+          return true;
+      }
+    }
+
+    // Check enum values
+    if (schema.enum) {
+      return schema.enum.includes(value);
+    }
+
+    // If no specific checks apply, consider it a match
+    return true;
+  } catch (error) {
+    debug.error("Error matching schema:", error);
+    return false;
+  }
+}
+
+/**
  * Generates possible schema paths including wildcards for pattern matching
  * @param {string[]} path - Array of path segments
  * @returns {string[]} Array of possible path patterns
@@ -413,11 +551,7 @@ function generatePossiblePaths(path) {
     // 2. services/node/*
     // 3. services/*
     for (let i = path.length - 1; i > 0; i--) {
-      const wildcardPath = [
-        ...path.slice(0, i),
-        "*",
-        ...path.slice(i + 1),
-      ].join("/");
+      const wildcardPath = [...path.slice(0, i), "*", ...path.slice(i + 1)].join("/");
       paths.push(wildcardPath);
     }
   }
@@ -444,6 +578,7 @@ export function validateYaml(content, schema) {
 
     debug.log("Parsing YAML content:", content);
     let parsed = YAML.parse(content);
+    const diagnostics = [];
 
     // Convert undefined/null values after colons to empty objects
     const lines = content.split("\n");
@@ -507,9 +642,9 @@ export function validateYaml(content, schema) {
               endLineNumber: location.line,
               startColumn: location.column,
               endColumn: location.column + unexpectedProp.length,
-              message: `Unexpected property "${unexpectedProp}"`,
+              message: `${SeveritySymbols[MarkerSeverity.Error]} Unexpected property \`${unexpectedProp}\`.`,
               severity: MarkerSeverity.Error,
-              source: "JSON Schema",
+              source: "schema(landofile)",
             });
           } else {
             errorsByLocation.set(locationKey, {
@@ -518,19 +653,25 @@ export function validateYaml(content, schema) {
               startColumn: location.column,
               endColumn: location.column + (location.length || 1),
               message: error.instancePath
-                ? `${error.instancePath.split("/").pop()} ${error.message} at ${error.instancePath}`
-                : error.message,
+                ? `${SeveritySymbols[MarkerSeverity.Error]} \`${error.instancePath.split("/").pop()}\` ${error.message} at \`${error.instancePath}\`.`
+                : `${SeveritySymbols[MarkerSeverity.Error]} ${error.message}`,
               severity: MarkerSeverity.Error,
-              source: "JSON Schema",
+              source: "schema(landofile)",
             });
           }
         }
       }
 
-      return Array.from(errorsByLocation.values());
+      diagnostics.push(...errorsByLocation.values());
     }
 
-    return [];
+    // Check for deprecations
+    const deprecations = findDeprecations(parsed, schema, content);
+    if (deprecations.length > 0) {
+      diagnostics.push(...deprecations);
+    }
+
+    return diagnostics;
   } catch (error) {
     debug.warn("YAML parsing error:", error);
 
@@ -546,7 +687,7 @@ export function validateYaml(content, schema) {
           endColumn: linePos ? linePos[1].col : content.length,
           message: message,
           severity: MarkerSeverity.Error,
-          source: "YAML Parser",
+          source: "validation(YAML)",
         },
       ];
     }
@@ -559,10 +700,126 @@ export function validateYaml(content, schema) {
         endColumn: content.length,
         message: error.message,
         severity: MarkerSeverity.Error,
-        source: "YAML Parser",
+        source: "validation(YAML)",
       },
     ];
   }
+}
+
+/**
+ * Finds deprecated properties in the YAML content
+ * @param {Object} parsed - Parsed YAML content
+ * @param {Object} schema - JSON schema
+ * @param {string} content - Raw YAML content
+ * @returns {Array<Object>} Array of deprecation diagnostics
+ */
+function findDeprecations(parsed, schema, content) {
+  const deprecations = [];
+
+  /**
+   * Recursively check object for deprecated properties
+   * @param {Object} obj - Object to check
+   * @param {string[]} path - Current path in object
+   * @param {Object} currentSchema - Schema section for current path
+   */
+  const checkObject = (obj, path, currentSchema) => {
+    if (!obj || typeof obj !== "object") return;
+
+    // Check each property in the object
+    for (const [key, value] of Object.entries(obj)) {
+      const newPath = [...path, key];
+      let propertySchema =
+        currentSchema?.properties?.[key] || findPatternProperty(key, currentSchema?.patternProperties);
+
+      // Check oneOf/anyOf schemas if no direct property schema found
+      if (!propertySchema && (currentSchema?.oneOf || currentSchema?.anyOf)) {
+        const variants = currentSchema.oneOf || currentSchema.anyOf;
+        for (const variant of variants) {
+          const variantSchema = variant.properties?.[key];
+          if (variantSchema?.deprecated) {
+            propertySchema = variantSchema;
+            break;
+          }
+        }
+      }
+
+      // Check if the property itself is deprecated
+      if (propertySchema?.deprecated) {
+        const location = findLocationInYaml(content, newPath);
+        deprecations.push({
+          startLineNumber: location.line,
+          endLineNumber: location.line,
+          startColumn: location.column,
+          endColumn: location.column + key.length,
+          message: `${SeveritySymbols[MarkerSeverity.Warning]} ${
+            typeof propertySchema.deprecated === "string" ? propertySchema.deprecated : `\`${key}\` is deprecated.`
+          }`,
+          severity: MarkerSeverity.Warning,
+          source: "validation(schema)",
+          tags: ["deprecated"],
+        });
+      }
+
+      // Check if the value matches a deprecated variant in oneOf/anyOf
+      if (value && (propertySchema?.oneOf || propertySchema?.anyOf)) {
+        const variants = propertySchema.oneOf || propertySchema.anyOf;
+        for (const variant of variants) {
+          if (variant.deprecated && matchesSchema(value, variant)) {
+            const location = findLocationInYaml(content, newPath);
+            const startColumn = location.column + key.length + 2;
+            const endColumn = startColumn + String(value).length;
+            deprecations.push({
+              startLineNumber: location.line,
+              endLineNumber: location.line,
+              startColumn: startColumn,
+              endColumn: endColumn,
+              message: `${SeveritySymbols[MarkerSeverity.Warning]} This value format is deprecated.`,
+              severity: MarkerSeverity.Warning,
+              source: "validation(schema)",
+              tags: ["deprecated"],
+            });
+            break;
+          }
+        }
+      }
+
+      // Recursively check nested objects
+      if (value && typeof value === "object") {
+        // Get the appropriate schema for the nested object
+        let nestedSchema = propertySchema;
+        if (propertySchema?.oneOf || propertySchema?.anyOf) {
+          const variants = propertySchema.oneOf || propertySchema.anyOf;
+          for (const variant of variants) {
+            if (matchesSchema(value, variant)) {
+              nestedSchema = variant;
+              break;
+            }
+          }
+        }
+        checkObject(value, newPath, nestedSchema);
+      }
+    }
+  };
+
+  checkObject(parsed, [], schema);
+  return deprecations;
+}
+
+/**
+ * Finds matching pattern property in schema
+ * @param {string} key - Property key to check
+ * @param {Object} patternProperties - Pattern properties from schema
+ * @returns {Object|null} Matching schema or null
+ */
+function findPatternProperty(key, patternProperties) {
+  if (!patternProperties) return null;
+
+  for (const [pattern, schema] of Object.entries(patternProperties)) {
+    if (new RegExp(pattern).test(key)) {
+      return schema;
+    }
+  }
+  return null;
 }
 
 /**
@@ -727,8 +984,7 @@ function getRootCompletions(schema, range) {
       isTrusted: true,
     },
     insertText: createInsertText(key, prop),
-    insertTextRules:
-      monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+    insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
     range: range,
     sortText: key,
   }));
@@ -792,8 +1048,7 @@ function getCompletionsForSchema(schema, range) {
             isTrusted: true,
           },
           insertText: createInsertText(key, prop),
-          insertTextRules:
-            monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+          insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
           range: range,
           sortText: `3${key}`,
         })),
@@ -802,9 +1057,7 @@ function getCompletionsForSchema(schema, range) {
 
     // Handle pattern properties
     if (currentSchema.patternProperties) {
-      for (const [pattern, prop] of Object.entries(
-        currentSchema.patternProperties,
-      )) {
+      for (const [pattern, prop] of Object.entries(currentSchema.patternProperties)) {
         if (prop.examples) {
           suggestions.push(
             ...prop.examples.map((example) => ({
@@ -815,8 +1068,7 @@ function getCompletionsForSchema(schema, range) {
                 isTrusted: true,
               },
               insertText: createInsertText(String(example), prop),
-              insertTextRules:
-                monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+              insertTextRules: monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
               range: range,
               sortText: `4${String(example)}`,
             })),
@@ -858,6 +1110,18 @@ function getCompletionsForSchema(schema, range) {
 function formatPropertyDocs(prop) {
   const parts = [];
 
+  // Add deprecation warning with symbol if property is deprecated
+  if (prop.deprecated) {
+    const symbol = SeveritySymbols[MarkerSeverity.Warning];
+    parts.push(
+      `${symbol} **Deprecated:** ${
+        typeof prop.deprecated === "string"
+          ? prop.deprecated
+          : "This property is deprecated and may be removed in a future version."
+      }`,
+    );
+  }
+
   if (prop.description) {
     parts.push(prop.description);
   }
@@ -875,9 +1139,7 @@ function formatPropertyDocs(prop) {
   }
 
   if (prop.examples?.length) {
-    parts.push(
-      `**Examples:**\n\`\`\`yaml\n${prop.examples.map((ex) => JSON.stringify(ex)).join("\n")}\n\`\`\``,
-    );
+    parts.push(`**Examples:**\n\`\`\`yaml\n${prop.examples.map((ex) => JSON.stringify(ex)).join("\n")}\n\`\`\``);
   }
 
   return parts.join("\n\n");
@@ -930,8 +1192,8 @@ function getSchemaAtPath(schema, path) {
 
     // Check pattern properties
     if (current.patternProperties) {
-      const patternMatch = Object.entries(current.patternProperties).find(
-        ([pattern]) => new RegExp(pattern).test(segment),
+      const patternMatch = Object.entries(current.patternProperties).find(([pattern]) =>
+        new RegExp(pattern).test(segment),
       );
       if (patternMatch) {
         current = patternMatch[1];
@@ -987,9 +1249,7 @@ const setupEditorFeatures = async (editor, toast) => {
   // Set up YAML tokenization
   const existingTokensProvider = TokenizationRegistry.get("yaml");
   if (existingTokensProvider) {
-    const originalTokenize = existingTokensProvider.tokenize.bind(
-      existingTokensProvider,
-    );
+    const originalTokenize = existingTokensProvider.tokenize.bind(existingTokensProvider);
     monaco.languages.setMonarchTokensProvider("yaml", {
       ...existingTokensProvider,
       tokenize: (line, state) => {
@@ -1096,9 +1356,4 @@ export { schemaDefinitions };
  */
 export { getCompletionItems };
 
-export {
-  setupEditorFeatures,
-  handleSchemaLoadFailure,
-  setupSchemaValidation,
-  updateDiagnostics,
-};
+export { setupEditorFeatures, handleSchemaLoadFailure, setupSchemaValidation, updateDiagnostics };
